@@ -727,7 +727,7 @@ static int modmap_set_system_pal_raw( INSTANCE * my, intptr_t * params )
 
 static int modmap_pal_set( INSTANCE * my, intptr_t * params )
 {
-    int ret = pal_set(( PALETTE * )bgd_handle_get( params[0] ), params[1], params[2], ( uint8_t * )params[3] ) ;
+    int ret = pal_set(( PALETTE * )bgd_handle_get( params[0] ), params[1], params[2], ( uint8_t * ) bgd_ptr( params[3] ) ) ;
     if ( ret && !params[0] ) pal_refresh( sys_pixel_format->palette );
     return ret;
 }
@@ -736,7 +736,7 @@ static int modmap_pal_set( INSTANCE * my, intptr_t * params )
 
 static int modmap_pal_get( INSTANCE * my, intptr_t * params )
 {
-    return ( pal_get(( PALETTE * )bgd_handle_get( params[0] ), params[1], params[2], ( uint8_t * )params[3] ) ) ;
+    return ( pal_get(( PALETTE * )bgd_handle_get( params[0] ), params[1], params[2], ( uint8_t * ) bgd_ptr( params[3] ) ) ) ;
 }
 
 /* ---------------------------------------------------------------------- */

@@ -36,6 +36,7 @@
 
 #include "files.h"
 #include "xstrings.h"
+#include "bgd_handles.h"
 
 #include "dlvaracc.h"
 #include "regex.h"
@@ -308,7 +309,7 @@ static int modregex_split (INSTANCE * my, intptr_t * params)
 {
     const char * reg = string_get(params[0]);
     const char * str = string_get(params[1]);
-    int * result_array = (int *)params[2];
+    int * result_array = (int *) bgd_ptr( params[2] );
     int result_array_size = params[3];
     int count = 0;
     int pos, lastpos = 0;
@@ -375,7 +376,7 @@ static int modregex_split (INSTANCE * my, intptr_t * params)
 static int modregex_join (INSTANCE * my, intptr_t * params)
 {
     const char * sep = string_get(params[0]);
-    int * string_array = (int *)params[1];
+    int * string_array = (int *) bgd_ptr( params[1] );
     int count = params[2] ;
     int total_length = 0;
     int sep_len = strlen(sep);

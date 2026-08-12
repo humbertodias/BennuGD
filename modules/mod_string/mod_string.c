@@ -34,6 +34,7 @@
 
 #include "files.h"
 #include "xstrings.h"
+#include "bgd_handles.h"
 
 /* STRINGS */
 
@@ -316,7 +317,7 @@ static int modstring_formatFI( INSTANCE * my, intptr_t * params )
 
 static int modstring_get_buffer( INSTANCE * my, intptr_t * params )
 {
-    int r = (int) string_get( params[0] );
+    int r = bgd_handle_put( ( void * ) string_get( params[0] ) );
     string_discard( params[0] ) ;
     return r;
 }
@@ -327,7 +328,7 @@ static int modstring_get_buffer( INSTANCE * my, intptr_t * params )
 
 static int modstring_string_alloc( INSTANCE * my, intptr_t * params )
 {
-    return ( int ) calloc( 1, sizeof( int ) ) ;
+    return bgd_handle_put( calloc( 1, sizeof( int ) ) ) ;
 }
 
 
@@ -340,10 +341,10 @@ static int modstring_string_alloc2( INSTANCE * my, intptr_t * params )
     int * r = malloc( sizeof( int ) ) ;
     if ( !r ) {
         string_discard( params[0] ) ;
-        return ( int ) NULL ;
+        return 0 ;
     }
     *r = params[0] ;
-    return ( int ) r ;
+    return bgd_handle_put( r ) ;
 }
 
 /** STRING_RELEASE( STRING ** )
@@ -351,11 +352,18 @@ static int modstring_string_alloc2( INSTANCE * my, intptr_t * params )
  */
 static int modstring_string_release( INSTANCE * my, intptr_t * params )
 {
-    int ** ppstr = ( int ** ) params[0] ;
-    if ( !ppstr ) return 0 ;
-    if ( *ppstr ) string_discard( **ppstr ) ;
-    free( *ppstr ) ;
-    *ppstr = NULL ;
+    int * ph = ( int * ) params[0] ;
+    int * pstr ;
+
+    if ( !ph ) return 0 ;
+    pstr = ( int * ) bgd_handle_get( *ph ) ;
+    if ( pstr )
+    {
+        if ( *pstr ) string_discard( *pstr ) ;
+        free( pstr ) ;
+        bgd_handle_free( *ph ) ;
+    }
+    *ph = 0 ;
     return 1 ;
 }
 

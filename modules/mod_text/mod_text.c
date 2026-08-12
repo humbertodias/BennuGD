@@ -33,6 +33,7 @@
 #include "bgdrtm.h"
 
 #include "bgddl.h"
+#include "bgd_handles.h"
 #include "dlvaracc.h"
 
 #include "xstrings.h"
@@ -99,8 +100,8 @@ static int __modtext_write_var( int withz, INSTANCE * my, intptr_t * params )
     DCB_TYPEDEF * var ;
     int t = 0 ;
 
-    if ( withz ) var =( DCB_TYPEDEF * )params[6];
-    else var =( DCB_TYPEDEF * )params[5];
+    if ( withz ) var =( DCB_TYPEDEF * ) bgd_ptr( params[6] );
+    else var =( DCB_TYPEDEF * ) bgd_ptr( params[5] );
 
     switch( var->BaseType[0] )
     {
@@ -157,8 +158,8 @@ static int __modtext_write_var( int withz, INSTANCE * my, intptr_t * params )
             break;
     }
 
-    if ( withz ) return gr_text_new_var2( params[0], params[1], params[2], params[3], params[4], ( void * )params[5], t );
-    return gr_text_new_var( params[0], params[1], params[2], params[3], ( void * )params[4], t );
+    if ( withz ) return gr_text_new_var2( params[0], params[1], params[2], params[3], params[4], bgd_ptr( params[5] ), t );
+    return gr_text_new_var( params[0], params[1], params[2], params[3], bgd_ptr( params[4] ), t );
 }
 
 /* --------------------------------------------------------------------------- */
@@ -182,14 +183,14 @@ static int modtext_write_var2( INSTANCE * my, intptr_t * params )
 
 static int modtext_write_string( INSTANCE * my, intptr_t * params )
 {
-    return gr_text_new_var( params[0], params[1], params[2], params[3], ( void * )params[4], TEXT_STRING );
+    return gr_text_new_var( params[0], params[1], params[2], params[3], bgd_ptr( params[4] ), TEXT_STRING );
 }
 
 /* --------------------------------------------------------------------------- */
 
 static int modtext_write_string2( INSTANCE * my, intptr_t * params )
 {
-    return gr_text_new_var2( params[0], params[1], params[2], params[3], params[4], ( void * )params[5], TEXT_STRING );
+    return gr_text_new_var2( params[0], params[1], params[2], params[3], params[4], bgd_ptr( params[5] ), TEXT_STRING );
 }
 
 /* --------------------------------------------------------------------------- */
@@ -199,14 +200,14 @@ static int modtext_write_string2( INSTANCE * my, intptr_t * params )
 
 static int modtext_write_int( INSTANCE * my, intptr_t * params )
 {
-    return gr_text_new_var( params[0], params[1], params[2], params[3], ( void * )params[4], TEXT_INT );
+    return gr_text_new_var( params[0], params[1], params[2], params[3], bgd_ptr( params[4] ), TEXT_INT );
 }
 
 /* --------------------------------------------------------------------------- */
 
 static int modtext_write_int2( INSTANCE * my, intptr_t * params )
 {
-    return gr_text_new_var2( params[0], params[1], params[2], params[3], params[4], ( void * )params[5], TEXT_INT );
+    return gr_text_new_var2( params[0], params[1], params[2], params[3], params[4], bgd_ptr( params[5] ), TEXT_INT );
 }
 
 /* --------------------------------------------------------------------------- */
@@ -216,14 +217,14 @@ static int modtext_write_int2( INSTANCE * my, intptr_t * params )
 
 static int modtext_write_float( INSTANCE * my, intptr_t * params )
 {
-    return gr_text_new_var( params[0], params[1], params[2], params[3], ( void * )params[4], TEXT_FLOAT );
+    return gr_text_new_var( params[0], params[1], params[2], params[3], bgd_ptr( params[4] ), TEXT_FLOAT );
 }
 
 /* --------------------------------------------------------------------------- */
 
 static int modtext_write_float2( INSTANCE * my, intptr_t * params )
 {
-    return gr_text_new_var2( params[0], params[1], params[2], params[3], params[4], ( void * )params[5], TEXT_FLOAT );
+    return gr_text_new_var2( params[0], params[1], params[2], params[3], params[4], bgd_ptr( params[5] ), TEXT_FLOAT );
 }
 
 /* --------------------------------------------------------------------------- */
