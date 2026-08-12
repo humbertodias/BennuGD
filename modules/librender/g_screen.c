@@ -171,7 +171,17 @@ int gr_lock_screen()
 
         if ( !scrbitmap )
         {
+            if ( !screen || screen->w < 2 || screen->h < 2 )
+            {
+                screen_locked = 0 ;
+                return -1 ;
+            }
             scrbitmap = bitmap_new( 0, screen->w / 2, screen->h / 2, sys_pixel_format->depth ) ;
+            if ( !scrbitmap )
+            {
+                screen_locked = 0 ;
+                return -1 ;
+            }
             bitmap_add_cpoint( scrbitmap, 0, 0 ) ;
         }
     }
@@ -179,8 +189,18 @@ int gr_lock_screen()
     {
         if ( !scrbitmap || !( scrbitmap->info_flags & GI_EXTERNAL_DATA ) )
         {
+            if ( !screen || screen->w < 1 || screen->h < 1 || !screen->pixels )
+            {
+                screen_locked = 0 ;
+                return -1 ;
+            }
             if ( scrbitmap ) bitmap_destroy( scrbitmap ) ;
             scrbitmap = bitmap_new_ex( 0, screen->w, screen->h, screen->format->BitsPerPixel, screen->pixels, screen->pitch );
+            if ( !scrbitmap )
+            {
+                screen_locked = 0 ;
+                return -1 ;
+            }
             bitmap_add_cpoint( scrbitmap, 0, 0 ) ;
         }
     }

@@ -284,7 +284,7 @@ static void do_mouse_events()
  *      1 if the mouse has changed since last call
  */
 
-static int mouse_info( INSTANCE * i, REGION * clip, int * z, int * drawme )
+static int mouse_info( void * what, REGION * clip, int * z, int * drawme )
 {
     int mousex ;
     int mousey ;
@@ -394,7 +394,7 @@ static int mouse_info( INSTANCE * i, REGION * clip, int * z, int * drawme )
  *      None
  */
 
-static void mouse_draw( INSTANCE * i, REGION * clip )
+static void mouse_draw( void * what, REGION * clip )
 {
     int r ;
     REGION region;
@@ -442,7 +442,7 @@ HOOK __bgdexport( libmouse, handler_hooks )[] =
 
 void __bgdexport( libmouse, module_initialize )()
 {
-    gr_new_object( GLOINT32( libmouse, MOUSEZ ),  ( OBJ_INFO * ) mouse_info, ( OBJ_DRAW * ) mouse_draw, ( void * ) 0 );
+    gr_new_object( GLOINT32( libmouse, MOUSEZ ),  mouse_info, mouse_draw, ( void * ) 0 );
 }
 
 /* --------------------------------------------------------------------------- */

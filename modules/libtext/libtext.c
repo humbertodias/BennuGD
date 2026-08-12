@@ -202,8 +202,9 @@ static const char * get_text( TEXT * text )
  *
  */
 
-static int info_text( TEXT * text, REGION * bbox, int * z, int * drawme )
+static int info_text( void * what, REGION * bbox, int * z, int * drawme )
 {
+    TEXT * text = (TEXT *)what ;
     const char * str = get_text( text );
     REGION prev = *bbox;
     FONT * font;
@@ -359,8 +360,9 @@ static int info_text( TEXT * text, REGION * bbox, int * z, int * drawme )
  *
  */
 
-void draw_text( TEXT * text, REGION * clip )
+void draw_text( void * what, REGION * clip )
 {
+    TEXT * text = (TEXT *)what ;
     const char * str = get_text( text );
     int save8, save16, save32;
     FONT * font;
@@ -435,7 +437,7 @@ int gr_text_new2( int fontid, int x, int y, int z, int alignment, const char * t
     texts[textid].color8 = fntcolor8 ;
     texts[textid].color16 = fntcolor16 ;
     texts[textid].color32 = fntcolor32 ;
-    texts[textid].objectid = gr_new_object( texts[textid].z, ( OBJ_INFO * ) info_text, ( OBJ_DRAW * ) draw_text, ( void * ) &texts[textid] );
+    texts[textid].objectid = gr_new_object( texts[textid].z, info_text, draw_text, ( void * ) &texts[textid] );
     texts[textid].last_value = 0 ;
     texts[textid].last_z = 0 ;
 
