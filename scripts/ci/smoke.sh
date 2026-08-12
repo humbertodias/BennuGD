@@ -9,40 +9,73 @@ ARCH=$(uname -m)
 case "$OS" in
   Darwin)
     TARGET=${TARGET:-${ARCH}-apple-darwin}
+    EXE=
+    ;;
+  MINGW*|MSYS*|CYGWIN*)
+    TARGET=${TARGET:-${ARCH}-w64-mingw32}
+    EXE=.exe
     ;;
   *)
-    TARGET=${TARGET:-${ARCH}-linux-gnu}
+    if [[ -n "${MSYSTEM:-}" ]]; then
+      TARGET=${TARGET:-${ARCH}-w64-mingw32}
+      EXE=.exe
+    else
+      TARGET=${TARGET:-${ARCH}-linux-gnu}
+      EXE=
+    fi
     ;;
 esac
 
 BIN="$ROOT/bin/$TARGET"
+BGDC="$BIN/bgdc${EXE}"
+BGDI="$BIN/bgdi${EXE}"
 
-if [[ ! -x "$BIN/bgdc" || ! -x "$BIN/bgdi" ]]; then
+if [[ ! -x "$BGDC" || ! -x "$BGDI" ]]; then
   echo "Missing binaries in $BIN" >&2
   ls -la "$BIN" >&2 || true
   exit 1
 fi
 
-if [[ "$OS" == Darwin ]]; then
-  export DYLD_LIBRARY_PATH="$BIN${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
-else
-  export LD_LIBRARY_PATH="$BIN${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-fi
+case "$OS" in
+  Darwin)
+    export DYLD_LIBRARY_PATH="$BIN${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
+    ;;
+  MINGW*|MSYS*|CYGWIN*)
+    export PATH="$BIN${PATH:+:$PATH}"
+    ;;
+  *)
+    if [[ -n "${MSYSTEM:-}" ]]; then
+      export PATH="$BIN${PATH:+:$PATH}"
+    else
+      export LD_LIBRARY_PATH="$BIN${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    fi
+    ;;
+esac
 
-echo "bgdc=$BIN/bgdc"
-echo "bgdi=$BIN/bgdi"
+echo "bgdc=$BGDC"
+echo "bgdi=$BGDI"
 
-"$BIN/bgdc" >/tmp/bgdc-help.txt 2>&1 || true
-"$BIN/bgdi" >/tmp/bgdi-help.txt 2>&1 || true
+"$BGDC" >/tmp/bgdc-help.txt 2>&1 || true
+"$BGDI" >/tmp/bgdi-help.txt 2>&1 || true
 grep -E 'BGDC|Compiler' /tmp/bgdc-help.txt
 grep -E 'BGDI|Interpreter' /tmp/bgdi-help.txt
 
 echo "Dynamic libs (informational):"
-if [[ "$OS" == Darwin ]]; then
-  otool -L "$BIN/bgdi" | head -40 || true
-else
-  ldd "$BIN/bgdi" | head -40 || true
-fi
+case "$OS" in
+  Darwin)
+    otool -L "$BGDI" | head -40 || true
+    ;;
+  MINGW*|MSYS*|CYGWIN*)
+    objdump -p "$BGDI" | grep -i 'DLL Name' | head -40 || true
+    ;;
+  *)
+    if [[ -n "${MSYSTEM:-}" ]]; then
+      objdump -p "$BGDI" | grep -i 'DLL Name' | head -40 || true
+    else
+      ldd "$BGDI" | head -40 || true
+    fi
+    ;;
+esac
 
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
@@ -63,9 +96,9 @@ Begin
 End
 EOF
 
-"$BIN/bgdc" "$TMP/smoke.prg"
+"$BGDC" "$TMP/smoke.prg"
 test -f "$TMP/smoke.dcb"
-"$BIN/bgdi" "$TMP/smoke.dcb" | tee /tmp/bgdi-smoke.txt
+"$BGDI" "$TMP/smoke.dcb" | tee /tmp/bgdi-smoke.txt
 grep -q 'ci-ok' /tmp/bgdi-smoke.txt
 
 # Video path (headless-friendly)
@@ -79,8 +112,8 @@ Begin
     say("video-ok");
 End
 EOF
-"$BIN/bgdc" "$TMP/video.prg"
-"$BIN/bgdi" "$TMP/video.dcb" | tee /tmp/bgdi-video.txt
+"$BGDC" "$TMP/video.prg"
+"$BGDI" "$TMP/video.dcb" | tee /tmp/bgdi-video.txt
 grep -q 'video-ok' /tmp/bgdi-video.txt
 
 echo "Smoke tests passed."

@@ -70,10 +70,12 @@ case "$target_os" in
 	    ;;
 
     mingw32)
-	    COMMON_CFLAGS="$COMMON_CFLAGS $CFLAGS -I/usr/local/include -DTARGET_WIN32 -DWIN32 -D_WIN32 -DUSE_LIBDES -I`pwd`/../3rdparty/des-4.04b"
-	    COMMON_LDFLAGS="$COMMON_LDFLAGS $LDFLAGS -L`pwd`/../3rdparty/des-4.04b -ldes -L/usr/local/lib -lshlwapi -lkernel32 -Wl,--enable-auto-import"
+        # MSYS2 MinGW-w64 (UCRT64/MINGW64): OpenSSL + modern CFLAGS (matches core).
+	    COMMON_CFLAGS="-std=gnu17 -Wall -DTARGET_WIN32 -DWIN32 -D_WIN32 -DUSE_OPENSSL -Wno-error=incompatible-pointer-types -Wno-error=int-conversion"
+	    COMMON_LDFLAGS="$COMMON_LDFLAGS $LDFLAGS -lshlwapi -lkernel32 -Wl,--enable-auto-import -static-libgcc"
         LM=-lm
-        USE_OPENSSL=no
+        LIBSSL="crypto"
+        USE_OPENSSL=yes
 	    ;;
 
     mingw32msvc)

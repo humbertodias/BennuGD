@@ -28,13 +28,41 @@ jobs:
           - runner: ubuntu-22.04
             platform: linux
             arch: x86_64
+          - runner: windows-latest
+            platform: windows
+            arch: x86_64
           - runner: macos-latest
             platform: macos
             arch: arm64
 
+    defaults:
+      run:
+        # Windows builds use MSYS2 MinGW (UCRT64); other OSes use bash.
+        shell: ${{ matrix.platform == 'windows' && 'msys2 {0}' || 'bash' }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup MSYS2 (MinGW UCRT64)
+        if: matrix.platform == 'windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-autotools
+            mingw-w64-ucrt-x86_64-openssl
+            mingw-w64-ucrt-x86_64-zlib
+            mingw-w64-ucrt-x86_64-libpng
+            git
+            curl
+            zip
+            make
 
       - name: Install Linux build dependencies
         if: matrix.platform == 'linux'
@@ -67,11 +95,17 @@ jobs:
           fi
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
-          if [[ "${{ matrix.platform }}" == "macos" ]]; then
-            echo "TARGET=$(uname -m)-apple-darwin" >> "$GITHUB_ENV"
-          else
-            echo "TARGET=$(uname -m)-linux-gnu" >> "$GITHUB_ENV"
-          fi
+          case "${{ matrix.platform }}" in
+            macos)
+              echo "TARGET=$(uname -m)-apple-darwin" >> "$GITHUB_ENV"
+              ;;
+            windows)
+              echo "TARGET=$(uname -m)-w64-mingw32" >> "$GITHUB_ENV"
+              ;;
+            *)
+              echo "TARGET=$(uname -m)-linux-gnu" >> "$GITHUB_ENV"
+              ;;
+          esac
           echo "PLATFORM=${{ matrix.platform }}" >> "$GITHUB_ENV"
           echo "ARCH=${{ matrix.arch }}" >> "$GITHUB_ENV"
 
@@ -79,7 +113,7 @@ jobs:
         env:
           DEPS_DIR: ${{ github.workspace }}/.deps
         run: |
-          chmod +x scripts/ci/*.sh build-linux-native.sh build-macos-native.sh
+          chmod +x scripts/ci/*.sh build-linux-native.sh build-macos-native.sh build-windows-native.sh
           scripts/ci/build-sdl3-deps.sh
 
       - name: Build
@@ -88,11 +122,11 @@ jobs:
         run: |
           # shellcheck disable=SC1091
           source "$DEPS_DIR/env.sh"
-          if [[ "${{ matrix.platform }}" == "macos" ]]; then
-            ./build-macos-native.sh release
-          else
-            ./build-linux-native.sh release
-          fi
+          case "${{ matrix.platform }}" in
+            macos) ./build-macos-native.sh release ;;
+            windows) ./build-windows-native.sh release ;;
+            *) ./build-linux-native.sh release ;;
+          esac
 
       - name: Smoke test binaries
         env:
@@ -123,11 +157,33 @@ jobs:
             "$PREFIX"/lib/libSDL3*.so* \
             "$PREFIX"/lib64/libSDL3*.so* \
             "$PREFIX"/lib/libSDL3*.dylib \
-            "$PREFIX"/lib/libSDL3_mixer*.dylib
+            "$PREFIX"/lib/libSDL3_mixer*.dylib \
+            "$PREFIX"/bin/SDL3*.dll \
+            "$PREFIX"/bin/libSDL3*.dll
           do
             [[ -e "$pat" ]] || continue
-            cp -a "$pat" "$STAGE/lib/"
+            case "$pat" in
+              *.dll) cp -a "$pat" "$STAGE/" ;;
+              *) cp -a "$pat" "$STAGE/lib/" ;;
+            esac
           done
+          # MinGW runtime / OpenSSL / zlib / libpng shared deps for Windows artifacts.
+          if [[ "${{ matrix.platform }}" == "windows" ]]; then
+            MINGW_BIN="${MSYSTEM_PREFIX:-/ucrt64}/bin"
+            for pat in \
+              "$MINGW_BIN"/libcrypto-*.dll \
+              "$MINGW_BIN"/libssl-*.dll \
+              "$MINGW_BIN"/libpng*.dll \
+              "$MINGW_BIN"/zlib*.dll \
+              "$MINGW_BIN"/libz*.dll \
+              "$MINGW_BIN"/libwinpthread-1.dll \
+              "$MINGW_BIN"/libgcc_s_seh-1.dll \
+              "$MINGW_BIN"/libstdc++-6.dll
+            do
+              [[ -e "$pat" ]] || continue
+              cp -a "$pat" "$STAGE/"
+            done
+          fi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -158,7 +214,14 @@ jobs:
             [[ -d "$art_dir" ]] || continue
             base="$(basename "$art_dir")"
             echo "Packaging $base"
-            tar -C artifacts -czf "$GITHUB_WORKSPACE/release-assets/${base}.tar.gz" "$base"
+            case "$base" in
+              *windows*)
+                (cd artifacts && zip -r "$GITHUB_WORKSPACE/release-assets/${base}.zip" "$base")
+                ;;
+              *)
+                tar -C artifacts -czf "$GITHUB_WORKSPACE/release-assets/${base}.tar.gz" "$base"
+                ;;
+            esac
           done
           ls -lah release-assets
           test -n "$(ls -A release-assets)"
@@ -176,10 +239,12 @@ jobs:
             Native builds of classic BennuGD (`bgdc` / `bgdi` + modules) on SDL3.
 
             - Linux x86_64
+            - Windows x86_64 (MinGW-w64 UCRT64)
             - macOS arm64
 
             Built with Autotools against SDL3, SDL3_mixer, libpng, zlib and OpenSSL.
-            Set `LD_LIBRARY_PATH` (Linux) or `DYLD_LIBRARY_PATH` (macOS) to the extracted
+            Linux/macOS: set `LD_LIBRARY_PATH` / `DYLD_LIBRARY_PATH` to the extracted
             directory (and its `lib/` folder) when running.
+            Windows: run the `.exe` from the extracted folder (DLLs ship alongside).
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

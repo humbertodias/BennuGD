@@ -90,11 +90,12 @@ cmake_configure "$SRC_DIR/SDL_mixer" "$SRC_DIR/SDL_mixer-build" \
 cmake_build_install "$SRC_DIR/SDL_mixer-build"
 
 # Help Autotools find the packages
+HOST_OS="$(uname -s)"
 {
   echo "export PREFIX=\"$PREFIX\""
   echo "export PKG_CONFIG_PATH=\"$PREFIX/lib/pkgconfig:$PREFIX/lib64/pkgconfig\${PKG_CONFIG_PATH:+:\$PKG_CONFIG_PATH}\""
   echo "export PATH=\"$PREFIX/bin:\$PATH\""
-  if [[ "$(uname -s)" == "Darwin" ]]; then
+  if [[ "$HOST_OS" == "Darwin" ]]; then
     echo "export DYLD_LIBRARY_PATH=\"$PREFIX/lib:$PREFIX/lib64\${DYLD_LIBRARY_PATH:+:\$DYLD_LIBRARY_PATH}\""
     # Homebrew OpenSSL / libpng for Autotools AC_CHECK_LIB / pkg-config.
     if command -v brew >/dev/null 2>&1; then
@@ -109,6 +110,12 @@ cmake_build_install "$SRC_DIR/SDL_mixer-build"
           echo "export DYLD_LIBRARY_PATH=\"$pref/lib:\${DYLD_LIBRARY_PATH:-}\""
         fi
       done
+    fi
+  elif [[ "$HOST_OS" == MINGW* || "$HOST_OS" == MSYS* || "$HOST_OS" == CYGWIN* || -n "${MSYSTEM:-}" ]]; then
+    # MinGW loads shared SDL3 from PATH (DLLs under prefix/bin).
+    echo "export PATH=\"$PREFIX/bin:\${MSYSTEM_PREFIX:-/ucrt64}/bin:\$PATH\""
+    if [[ -n "${MSYSTEM_PREFIX:-}" && -d "$MSYSTEM_PREFIX/lib/pkgconfig" ]]; then
+      echo "export PKG_CONFIG_PATH=\"$MSYSTEM_PREFIX/lib/pkgconfig:\$PKG_CONFIG_PATH\""
     fi
   else
     echo "export LD_LIBRARY_PATH=\"$PREFIX/lib:$PREFIX/lib64\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}\""

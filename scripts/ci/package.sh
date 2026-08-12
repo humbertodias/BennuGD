@@ -12,10 +12,21 @@ case "$OS" in
     TARGET=${TARGET:-${ARCH}-apple-darwin}
     SHLIB_EXT=dylib
     ;;
+  MINGW*|MSYS*|CYGWIN*)
+    PLATFORM=${PLATFORM:-windows}
+    TARGET=${TARGET:-${ARCH}-w64-mingw32}
+    SHLIB_EXT=dll
+    ;;
   *)
-    PLATFORM=${PLATFORM:-linux}
-    TARGET=${TARGET:-${ARCH}-linux-gnu}
-    SHLIB_EXT=so
+    if [[ -n "${MSYSTEM:-}" ]]; then
+      PLATFORM=${PLATFORM:-windows}
+      TARGET=${TARGET:-${ARCH}-w64-mingw32}
+      SHLIB_EXT=dll
+    else
+      PLATFORM=${PLATFORM:-linux}
+      TARGET=${TARGET:-${ARCH}-linux-gnu}
+      SHLIB_EXT=so
+    fi
     ;;
 esac
 
@@ -35,15 +46,26 @@ mkdir -p "$STAGE"
 cp -a "$BIN"/. "$STAGE/"
 
 # Prefer stable module names without libtool "lib" prefix.
-for f in "$STAGE"/libmod_*."$SHLIB_EXT" "$STAGE"/libmod_*.so; do
+shopt -s nullglob
+for f in "$STAGE"/libmod_*."$SHLIB_EXT"; do
   [[ -e "$f" ]] || continue
   base=$(basename "$f")
-  ln -sfn "$base" "$STAGE/${base#lib}"
+  dest="$STAGE/${base#lib}"
+  if [[ "$PLATFORM" == "windows" ]]; then
+    cp -f "$f" "$dest"
+  else
+    ln -sfn "$base" "$dest"
+  fi
 done
 
 if [[ "$PLATFORM" == "macos" ]]; then
   RUN_HINT=$(cat <<'EOF'
   export DYLD_LIBRARY_PATH="$PWD:$PWD/lib:$DYLD_LIBRARY_PATH"
+EOF
+)
+elif [[ "$PLATFORM" == "windows" ]]; then
+  RUN_HINT=$(cat <<'EOF'
+  # Keep DLLs next to the .exe (or add this folder to PATH).
 EOF
 )
 else
@@ -53,6 +75,9 @@ EOF
 )
 fi
 
+EXE_SUFFIX=
+[[ "$PLATFORM" == "windows" ]] && EXE_SUFFIX=.exe
+
 cat > "$STAGE/README.txt" <<EOF
 BennuGD ${VERSION} (${PLATFORM}-${ARCH})
 
@@ -60,8 +85,8 @@ Contents: bgdc, bgdi, libbgdrtm, modules (mod_*).
 
 Run with:
 ${RUN_HINT}
-  ./bgdc game.prg
-  ./bgdi game.dcb
+  ./bgdc${EXE_SUFFIX} game.prg
+  ./bgdi${EXE_SUFFIX} game.dcb
 EOF
 
 echo "Staged $STAGE"
