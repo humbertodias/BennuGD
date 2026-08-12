@@ -179,7 +179,7 @@ static int modmap_map_buffer( INSTANCE * my, intptr_t * params )
     else
         map = background ;
 
-    return map ? ( int )map->data : 0 ;
+    return map ? bgd_handle_put( map->data ) : 0 ;
 }
 
 /* --------------------------------------------------------------------------- */

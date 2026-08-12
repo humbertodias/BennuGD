@@ -5,9 +5,9 @@
 lib_LTLIBRARIES = libmod_dir.la
 
 libmod_dir_la_SOURCES = mod_dir.c
-libmod_dir_la_CFLAGS = $(COMMON_CFLAGS) -I$(BGD_PATH)/include
+libmod_dir_la_CFLAGS = $(COMMON_CFLAGS) -I$(BGD_PATH)/include -I../libgrbase/
 libmod_dir_la_LDFLAGS = -s -module -no-undefined -avoid-version
-libmod_dir_la_LIBADD = $(COMMON_LDFLAGS) -L$(BGD_PATH)/bgdrtm/src/.libs -lbgdrtm
+libmod_dir_la_LIBADD = $(COMMON_LDFLAGS) -L../libgrbase/.libs -lgrbase -L$(BGD_PATH)/bgdrtm/src/.libs -lbgdrtm
 
 ## Make sure these will be cleaned even when they're not built by
 ## default.

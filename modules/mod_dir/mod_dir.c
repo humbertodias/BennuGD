@@ -51,6 +51,7 @@
 #endif
 
 #include "bgddl.h"
+#include "bgd_handles.h"
 #include "dlvaracc.h"
 #include "files.h"
 #include "xstrings.h"
@@ -234,7 +235,7 @@ static int moddir_glob( INSTANCE * my, intptr_t * params )
 
 static int moddir_open( INSTANCE * my, intptr_t * params )
 {
-    int result = ( int ) dir_open( string_get( params[ 0 ] ) );
+    int result = bgd_handle_put( dir_open( string_get( params[ 0 ] ) ) );
     string_discard( params[ 0 ] );
     return result;
 }
@@ -244,7 +245,7 @@ static int moddir_open( INSTANCE * my, intptr_t * params )
 
 static int moddir_close( INSTANCE * my, intptr_t * params )
 {
-    if ( params[ 0 ] ) dir_close ( ( __DIR_ST * ) params[ 0 ] ) ;
+    if ( params[ 0 ] ) { dir_close ( ( __DIR_ST * ) bgd_handle_get( params[ 0 ] ) ) ; bgd_handle_free( params[ 0 ] ); }
     return 1;
 }
 
@@ -257,7 +258,7 @@ static int moddir_close( INSTANCE * my, intptr_t * params )
 
 static int moddir_read( INSTANCE * my, intptr_t * params )
 {
-    return ( __moddir_read((__DIR_ST *) params[ 0 ] ) ) ;
+    return ( __moddir_read((__DIR_ST *) bgd_handle_get( params[ 0 ] ) ) ) ;
 }
 
 /* ----------------------------------------------------------------- */

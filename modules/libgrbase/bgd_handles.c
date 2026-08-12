@@ -16,6 +16,13 @@ int bgd_handle_put( void * ptr )
 
     if ( !ptr ) return 0;
 
+    /* Reuse an existing id for the same pointer (e.g. repeated map_buffer). */
+    for ( id = 1; id < handles_cap; id++ )
+    {
+        if ( handles[id] == ptr )
+            return id;
+    }
+
     for ( id = 1; id < handles_cap; id++ )
     {
         if ( !handles[id] )
