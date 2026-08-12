@@ -37,6 +37,7 @@
 #include "dlvaracc.h"
 
 #include "libgrbase.h"
+#include "bgd_handles.h"
 #include "libblit.h"
 #include "librender.h"
 
@@ -682,7 +683,7 @@ static int modflic_startx1( INSTANCE * my, intptr_t * params )
         flic->size = 100;
         flic->flags = 0;
 
-        return ( int ) flic ;
+        return bgd_handle_put( flic );
     }
 
     return 0 ;
@@ -707,7 +708,7 @@ static int modflic_startx2( INSTANCE * my, intptr_t * params )
         flic->size = params[5];
         flic->flags = params[6];
 
-        return ( int ) flic ;
+        return bgd_handle_put( flic );
     }
 
     return 0 ;
@@ -715,24 +716,24 @@ static int modflic_startx2( INSTANCE * my, intptr_t * params )
 
 static int modflic_resetx( INSTANCE * my, intptr_t * params )
 {
-    flic_reset(( FLIC * ) params[0] ) ;
+    flic_reset(( FLIC * ) bgd_handle_get( params[0] )) ;
     return 1 ;
 }
 
 static int modflic_endx( INSTANCE * my, intptr_t * params )
 {
-    flic_destroy((( FLIC * ) params[0] ) ) ;
+    flic_destroy((( FLIC * ) bgd_handle_get( params[0] )) ) ; bgd_handle_free( params[0] ) ;
     return 1 ;
 }
 
 static int modflic_framex( INSTANCE * my, intptr_t * params )
 {
-    return (( FLIC * ) params[0] )->finished ? 0 : (( FLIC * ) params[0] )->current_frame ;
+    return (( FLIC * ) bgd_handle_get( params[0] ))->finished ? 0 : (( FLIC * ) bgd_handle_get( params[0] ))->current_frame ;
 }
 
 static int modflic_params( INSTANCE * my, intptr_t * params )
 {
-    FLIC * flic = ( FLIC * ) params[0] ;
+    FLIC * flic = ( FLIC * ) bgd_handle_get( params[0] ) ;
 
     flic->x = params[1] ;
     flic->y = params[2] ;
@@ -746,7 +747,7 @@ static int modflic_params( INSTANCE * my, intptr_t * params )
 
 static int modflic_move( INSTANCE * my, intptr_t * params )
 {
-    FLIC * flic = ( FLIC * ) params[0] ;
+    FLIC * flic = ( FLIC * ) bgd_handle_get( params[0] ) ;
 
     flic->x = params[1] ;
     flic->y = params[2] ;
@@ -756,35 +757,35 @@ static int modflic_move( INSTANCE * my, intptr_t * params )
 
 static int modflic_z( INSTANCE * my, intptr_t * params )
 {
-    (( FLIC * ) params[0] )->z = params[1] ;
+    (( FLIC * ) bgd_handle_get( params[0] ))->z = params[1] ;
 
     return 1 ;
 }
 
 static int modflic_angle( INSTANCE * my, intptr_t * params )
 {
-    (( FLIC * ) params[0] )->angle = params[1] ;
+    (( FLIC * ) bgd_handle_get( params[0] ))->angle = params[1] ;
 
     return 1 ;
 }
 
 static int modflic_size( INSTANCE * my, intptr_t * params )
 {
-    (( FLIC * ) params[0] )->size = params[1] ;
+    (( FLIC * ) bgd_handle_get( params[0] ))->size = params[1] ;
 
     return 1 ;
 }
 
 static int modflic_flags( INSTANCE * my, intptr_t * params )
 {
-    (( FLIC * ) params[0] )->flags = params[1] ;
+    (( FLIC * ) bgd_handle_get( params[0] ))->flags = params[1] ;
 
     return 1 ;
 }
 
 static int modflic_getinfo( INSTANCE * my, intptr_t * params )
 {
-    FLIC * flic = ( FLIC * ) params[0] ;
+    FLIC * flic = ( FLIC * ) bgd_handle_get( params[0] ) ;
 
     if ((( int * ) params[1] ) ) *(( int * ) params[1] ) = flic->x ;
     if ((( int * ) params[2] ) ) *(( int * ) params[2] ) = flic->y ;

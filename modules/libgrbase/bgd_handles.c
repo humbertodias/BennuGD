@@ -49,3 +49,10 @@ void bgd_handle_free( int handle )
     if ( handle <= 0 || handle >= handles_cap ) return;
     handles[handle] = NULL;
 }
+
+void * bgd_ptr( intptr_t value )
+{
+    void * p = bgd_handle_get( ( int ) value );
+    if ( p ) return p;
+    return ( void * ) value;
+}

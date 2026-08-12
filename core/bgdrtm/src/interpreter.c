@@ -880,35 +880,35 @@ main_loop_instance_go:
                 break;
 
             case MN_FLOAT2INT:
-                *( int32_t * )&( r->stack_ptr[-ptr[1] - 1] ) = ( int32_t ) * ( float * ) & ( r->stack_ptr[-ptr[1] - 1] );
+                r->stack_ptr[-ptr[1] - 1] = ( intptr_t )( int32_t ) stack_get_f( r->stack_ptr[-ptr[1] - 1] ) ;
                 ptr += 2;
                 break;
 
             case MN_INT2FLOAT:
             case MN_INT2FLOAT | MN_UNSIGNED:
-                *( float * )&( r->stack_ptr[-ptr[1] - 1] ) = ( float ) * ( int32_t * ) & ( r->stack_ptr[-ptr[1] - 1] );
+                r->stack_ptr[-ptr[1] - 1] = stack_from_f( ( float )( int32_t ) r->stack_ptr[-ptr[1] - 1] ) ;
                 ptr += 2;
                 break;
 
             case MN_INT2FLOAT | MN_UNSIGNED | MN_WORD:
-                *( float * )&( r->stack_ptr[-ptr[1] - 1] ) = ( float ) * ( uint16_t * ) & ( r->stack_ptr[-ptr[1] - 1] );
+                r->stack_ptr[-ptr[1] - 1] = stack_from_f( ( float )( uint16_t )( int32_t ) r->stack_ptr[-ptr[1] - 1] ) ;
                 ptr += 2;
                 break;
 
             case MN_INT2FLOAT | MN_UNSIGNED | MN_BYTE:
-                *( float * )&( r->stack_ptr[-ptr[1] - 1] ) = ( float ) * ( uint8_t * ) & ( r->stack_ptr[-ptr[1] - 1] );
+                r->stack_ptr[-ptr[1] - 1] = stack_from_f( ( float )( uint8_t )( int32_t ) r->stack_ptr[-ptr[1] - 1] ) ;
                 ptr += 2;
                 break;
 
             case MN_INT2WORD:
             case MN_INT2WORD | MN_UNSIGNED:
-                *( uint32_t * )&( r->stack_ptr[-ptr[1] - 1] ) = ( int32_t )( uint16_t ) * ( int32_t * ) & ( r->stack_ptr[-ptr[1] - 1] );
+                r->stack_ptr[-ptr[1] - 1] = ( intptr_t )( int32_t )( uint16_t )( int32_t ) r->stack_ptr[-ptr[1] - 1] ;
                 ptr += 2;
                 break;
 
             case MN_INT2BYTE:
             case MN_INT2BYTE | MN_UNSIGNED:
-                *( uint32_t * )&( r->stack_ptr[-ptr[1] - 1] ) = ( int32_t )( uint8_t ) * ( int32_t * ) & ( r->stack_ptr[-ptr[1] - 1] );
+                r->stack_ptr[-ptr[1] - 1] = ( intptr_t )( int32_t )( uint8_t )( int32_t ) r->stack_ptr[-ptr[1] - 1] ;
                 ptr += 2;
                 break;
 
@@ -1374,7 +1374,7 @@ main_loop_instance_go:
                 break;
 
             case MN_FLOAT2STR:
-                r->stack_ptr[-ptr[1] - 1] = string_ftoa( *( float * ) & r->stack_ptr[-ptr[1] - 1] );
+                r->stack_ptr[-ptr[1] - 1] = string_ftoa( stack_get_f( r->stack_ptr[-ptr[1] - 1] ) ) ;
                 string_use( r->stack_ptr[-ptr[1] - 1] );
                 ptr += 2;
                 break;
@@ -1414,7 +1414,7 @@ main_loop_instance_go:
             case MN_STR2FLOAT:
                 n = r->stack_ptr[-ptr[1] - 1];
                 str = ( char * )string_get( n );
-                *( float * )( &r->stack_ptr[-ptr[1] - 1] ) = str ? ( float )atof( str ) : 0.0f;
+                r->stack_ptr[-ptr[1] - 1] = stack_from_f( str ? ( float )atof( str ) : 0.0f ) ;
                 string_discard( n );
                 ptr += 2;
                 break;
