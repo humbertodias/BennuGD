@@ -51,6 +51,10 @@ case "$target_os" in
           esac
   	    ;;
 
+    darwin*)
+          CFLAGS+=" -std=gnu17 -Wall -DTARGET_MAC -Wno-error=incompatible-pointer-types -Wno-error=int-conversion"
+          ;;
+
 esac
 
 COMMON_CFLAGS+="$CFLAGS -I${bennu_prefix}/include"

@@ -93,8 +93,8 @@ case "$target_os" in
 	    ;;
 
     darwin*)
-        COMMON_CFLAGS="-I/usr/local/include -Wall -DTARGET_MAC"
-        COMMON_LDFLAGS="-L/usr/local/lib"
+        COMMON_CFLAGS="-std=gnu17 -Wall -DTARGET_MAC -Wno-error=incompatible-pointer-types -Wno-error=int-conversion"
+        COMMON_LDFLAGS="-L/usr/local/lib -L/opt/homebrew/lib"
         LM=-lm
         LIBSSL="crypto"
         USE_OPENSSL=yes

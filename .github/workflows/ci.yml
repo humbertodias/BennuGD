@@ -19,14 +19,25 @@ env:
 
 jobs:
   build:
-    name: linux-x86_64
-    runs-on: ubuntu-22.04
+    name: ${{ matrix.platform }}-${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-22.04
+            platform: linux
+            arch: x86_64
+          - runner: macos-latest
+            platform: macos
+            arch: arm64
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install build dependencies
+      - name: Install Linux build dependencies
+        if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -39,6 +50,13 @@ jobs:
             libdbus-1-dev libibus-1.0-dev libwayland-dev libxkbcommon-dev \
             libdrm-dev libgbm-dev
 
+      - name: Install macOS build dependencies
+        if: matrix.platform == 'macos'
+        run: |
+          brew update
+          brew install automake autoconf libtool pkg-config cmake ninja \
+            openssl@3 libpng || true
+
       - name: Resolve version
         id: meta
         run: |
@@ -49,13 +67,19 @@ jobs:
           fi
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
-          echo "TARGET=$(uname -m)-linux-gnu" >> "$GITHUB_ENV"
+          if [[ "${{ matrix.platform }}" == "macos" ]]; then
+            echo "TARGET=$(uname -m)-apple-darwin" >> "$GITHUB_ENV"
+          else
+            echo "TARGET=$(uname -m)-linux-gnu" >> "$GITHUB_ENV"
+          fi
+          echo "PLATFORM=${{ matrix.platform }}" >> "$GITHUB_ENV"
+          echo "ARCH=${{ matrix.arch }}" >> "$GITHUB_ENV"
 
       - name: Build SDL3 dependencies
         env:
           DEPS_DIR: ${{ github.workspace }}/.deps
         run: |
-          chmod +x scripts/ci/*.sh build-linux-native.sh
+          chmod +x scripts/ci/*.sh build-linux-native.sh build-macos-native.sh
           scripts/ci/build-sdl3-deps.sh
 
       - name: Build
@@ -64,7 +88,11 @@ jobs:
         run: |
           # shellcheck disable=SC1091
           source "$DEPS_DIR/env.sh"
-          ./build-linux-native.sh release
+          if [[ "${{ matrix.platform }}" == "macos" ]]; then
+            ./build-macos-native.sh release
+          else
+            ./build-linux-native.sh release
+          fi
 
       - name: Smoke test binaries
         env:
@@ -79,22 +107,33 @@ jobs:
         env:
           VERSION: ${{ steps.meta.outputs.version }}
           TARGET: ${{ env.TARGET }}
+          PLATFORM: ${{ env.PLATFORM }}
+          ARCH: ${{ env.ARCH }}
           DIST_DIR: ${{ github.workspace }}/dist
           DEPS_DIR: ${{ github.workspace }}/.deps
         run: |
           # shellcheck disable=SC1091
           source "$DEPS_DIR/env.sh"
           scripts/ci/package.sh
+          STAGE="dist/stage/bennugd-${VERSION}-${PLATFORM}-${ARCH}"
+          mkdir -p "$STAGE/lib"
           # Ship runtime SDL3 libs next to binaries for portable artifacts.
-          mkdir -p "dist/stage/bennugd-${VERSION}-linux-x86_64/lib"
-          cp -a "$PREFIX"/lib/libSDL3*.so* "dist/stage/bennugd-${VERSION}-linux-x86_64/lib/" 2>/dev/null || true
-          cp -a "$PREFIX"/lib64/libSDL3*.so* "dist/stage/bennugd-${VERSION}-linux-x86_64/lib/" 2>/dev/null || true
+          shopt -s nullglob
+          for pat in \
+            "$PREFIX"/lib/libSDL3*.so* \
+            "$PREFIX"/lib64/libSDL3*.so* \
+            "$PREFIX"/lib/libSDL3*.dylib \
+            "$PREFIX"/lib/libSDL3_mixer*.dylib
+          do
+            [[ -e "$pat" ]] || continue
+            cp -a "$pat" "$STAGE/lib/"
+          done
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: bennugd-${{ steps.meta.outputs.version }}-linux-x86_64
-          path: dist/stage/bennugd-${{ steps.meta.outputs.version }}-linux-x86_64/
+          name: bennugd-${{ steps.meta.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}
+          path: dist/stage/bennugd-${{ steps.meta.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}/
           if-no-files-found: error
           retention-days: 14
 
@@ -134,9 +173,13 @@ jobs:
           generate_release_notes: true
           files: release-assets/*
           body: |
-            Native Linux x86_64 build of classic BennuGD (`bgdc` / `bgdi` + modules) on SDL3.
+            Native builds of classic BennuGD (`bgdc` / `bgdi` + modules) on SDL3.
+
+            - Linux x86_64
+            - macOS arm64
 
             Built with Autotools against SDL3, SDL3_mixer, libpng, zlib and OpenSSL.
-            Set `LD_LIBRARY_PATH` to the extracted directory (and its `lib/` folder) when running.
+            Set `LD_LIBRARY_PATH` (Linux) or `DYLD_LIBRARY_PATH` (macOS) to the extracted
+            directory (and its `lib/` folder) when running.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

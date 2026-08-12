@@ -3,7 +3,18 @@
 set -euo pipefail
 
 ROOT=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
-TARGET=${TARGET:-$(uname -m)-linux-gnu}
+
+OS=$(uname -s)
+ARCH=$(uname -m)
+case "$OS" in
+  Darwin)
+    TARGET=${TARGET:-${ARCH}-apple-darwin}
+    ;;
+  *)
+    TARGET=${TARGET:-${ARCH}-linux-gnu}
+    ;;
+esac
+
 BIN="$ROOT/bin/$TARGET"
 
 if [[ ! -x "$BIN/bgdc" || ! -x "$BIN/bgdi" ]]; then
@@ -12,7 +23,11 @@ if [[ ! -x "$BIN/bgdc" || ! -x "$BIN/bgdi" ]]; then
   exit 1
 fi
 
-export LD_LIBRARY_PATH="$BIN${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+if [[ "$OS" == Darwin ]]; then
+  export DYLD_LIBRARY_PATH="$BIN${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
+else
+  export LD_LIBRARY_PATH="$BIN${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+fi
 
 echo "bgdc=$BIN/bgdc"
 echo "bgdi=$BIN/bgdi"
@@ -23,7 +38,11 @@ grep -E 'BGDC|Compiler' /tmp/bgdc-help.txt
 grep -E 'BGDI|Interpreter' /tmp/bgdi-help.txt
 
 echo "Dynamic libs (informational):"
-ldd "$BIN/bgdi" | head -40 || true
+if [[ "$OS" == Darwin ]]; then
+  otool -L "$BIN/bgdi" | head -40 || true
+else
+  ldd "$BIN/bgdi" | head -40 || true
+fi
 
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT

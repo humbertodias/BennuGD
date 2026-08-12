@@ -93,11 +93,31 @@ cmake_build_install "$SRC_DIR/SDL_mixer-build"
 {
   echo "export PREFIX=\"$PREFIX\""
   echo "export PKG_CONFIG_PATH=\"$PREFIX/lib/pkgconfig:$PREFIX/lib64/pkgconfig\${PKG_CONFIG_PATH:+:\$PKG_CONFIG_PATH}\""
-  echo "export LD_LIBRARY_PATH=\"$PREFIX/lib:$PREFIX/lib64\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}\""
   echo "export PATH=\"$PREFIX/bin:\$PATH\""
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    echo "export DYLD_LIBRARY_PATH=\"$PREFIX/lib:$PREFIX/lib64\${DYLD_LIBRARY_PATH:+:\$DYLD_LIBRARY_PATH}\""
+    # Homebrew OpenSSL / libpng for Autotools AC_CHECK_LIB / pkg-config.
+    if command -v brew >/dev/null 2>&1; then
+      for f in openssl@3 libpng zlib; do
+        pref="$(brew --prefix "$f" 2>/dev/null || true)"
+        if [[ -n "$pref" && -d "$pref/lib/pkgconfig" ]]; then
+          echo "export PKG_CONFIG_PATH=\"$pref/lib/pkgconfig:\$PKG_CONFIG_PATH\""
+        fi
+        if [[ -n "$pref" && -d "$pref/lib" ]]; then
+          echo "export LDFLAGS=\"-L$pref/lib \${LDFLAGS:-}\""
+          echo "export CPPFLAGS=\"-I$pref/include \${CPPFLAGS:-}\""
+          echo "export DYLD_LIBRARY_PATH=\"$pref/lib:\${DYLD_LIBRARY_PATH:-}\""
+        fi
+      done
+    fi
+  else
+    echo "export LD_LIBRARY_PATH=\"$PREFIX/lib:$PREFIX/lib64\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}\""
+  fi
 } > "$DEPS_DIR/env.sh"
 
 echo "==> Wrote $DEPS_DIR/env.sh"
+# shellcheck disable=SC1091
+source "$DEPS_DIR/env.sh"
 pkg-config --exists --print-errors sdl3
 pkg-config --exists --print-errors sdl3-mixer
 pkg-config --modversion sdl3
