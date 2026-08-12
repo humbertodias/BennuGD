@@ -101,6 +101,12 @@ cp -f core/bgdi/src/.libs/bgdi "bin/${TARGET}/"
 cp -f core/bgdc/src/bgdc "bin/${TARGET}/"
 cp -f core/bgdrtm/src/.libs/libbgdrtm.so "bin/${TARGET}/"
 find modules -name '*.so' -exec cp -f {} "bin/${TARGET}/" \;
+# bgdc/bgdi load "mod_foo.so"; libtool emits libmod_foo.so
+for f in "bin/${TARGET}"/libmod_*.so; do
+    [ -e "$f" ] || continue
+    base=$(basename "$f")
+    ln -sfn "$base" "bin/${TARGET}/${base#lib}"
+done
 if [ -f tools/moddesc/moddesc ]; then
     cp -f tools/moddesc/moddesc "bin/${TARGET}/"
 elif [ -f tools/moddesc/.libs/moddesc ]; then

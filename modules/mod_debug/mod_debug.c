@@ -2470,7 +2470,7 @@ static int console_info( void * what, REGION * clip, int * z, int * drawme ) {
 
 /* --------------------------------------------------------------------------- */
 
-static int moddebug_trace( INSTANCE * my, int * params ) {
+static int moddebug_trace( INSTANCE * my, intptr_t * params ) {
     debug = params[0];
     return 0 ;
 }

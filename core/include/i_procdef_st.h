@@ -29,6 +29,8 @@
 #ifndef __I_PROCDEF_ST_H
 #define __I_PROCDEF_ST_H
 
+#include <stdint.h>
+
 #include "instance_st.h"
 
 /* Process definitions, more simple that in the compiler */
@@ -71,7 +73,7 @@ PROCDEF ;
 
 /* System functions */
 
-typedef int SYSFUNC (INSTANCE *, int *) ;
+typedef int SYSFUNC (INSTANCE *, intptr_t *) ;
 typedef struct _sysproc
 {
 	int       code ;

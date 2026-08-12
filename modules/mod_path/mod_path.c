@@ -365,7 +365,7 @@ static int path_set_wall( int n )
 /* --------------------------------------------------------------------------- */
 /* Funciones de búsqueda de caminos */
 
-static int modpathfind_path_find( INSTANCE * my, int * params )
+static int modpathfind_path_find( INSTANCE * my, intptr_t * params )
 {
     GRAPH * gpath = bitmap_get( params[0], params[1] ) ;
     if ( !gpath || !gpath->format || gpath->format->depth != 8 ) return 0;
@@ -374,14 +374,14 @@ static int modpathfind_path_find( INSTANCE * my, int * params )
 
 /* --------------------------------------------------------------------------- */
 
-static int modpathfind_path_getxy( INSTANCE * my, int * params )
+static int modpathfind_path_getxy( INSTANCE * my, intptr_t * params )
 {
     return path_get(( int * )params[0], ( int * )params[1] ) ;
 }
 
 /* --------------------------------------------------------------------------- */
 
-static int modpathfind_path_wall( INSTANCE * my, int * params )
+static int modpathfind_path_wall( INSTANCE * my, intptr_t * params )
 {
     return path_set_wall( params[0] ) ;
 }

@@ -28,6 +28,7 @@
 
 #ifndef BGLOAD_H
 #define BGLOAD_H
+#include <stdint.h>
 
 /* --------------------------------------------------------------------------- */
 
@@ -39,7 +40,7 @@ typedef struct
 
 /* --------------------------------------------------------------------------- */
 
-extern int bgload( int ( *fn )( const char * ), int * params );
+extern int bgload( int ( *fn )( const char * ), intptr_t * params );
 
 /* --------------------------------------------------------------------------- */
 

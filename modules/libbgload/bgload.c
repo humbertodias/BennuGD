@@ -27,6 +27,7 @@
  */
 
 #include "xstrings.h"
+#include <stdint.h>
 
 #include <SDL.h>
 
@@ -44,7 +45,7 @@
  * Helper function preparing params
  **/
 
-static bgdata *prep( int *params )
+static bgdata *prep( intptr_t *params )
 {
     bgdata *t = ( bgdata* )malloc( sizeof( bgdata ) );
     t->file = strdup(( char * )string_get( params[0] ));
@@ -71,7 +72,7 @@ int bgDoLoad( void *d )
 
 /* --------------------------------------------------------------------------- */
 
-int bgload( int ( *fn )( const char * ), int * params )
+int bgload( int ( *fn )( const char * ), intptr_t * params )
 {
     bgdata *t = prep( params );
     t->fn = fn;
