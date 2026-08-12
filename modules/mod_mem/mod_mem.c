@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2006-2019 SplinterGU (Fenix/Bennugd)
- *  Copyright © 2002-2006 Fenix Team (Fenix)
- *  Copyright © 1999-2002 José Luis Cebrián Pagüe (Fenix)
+ *  Copyright Â© 2006-2019 SplinterGU (Fenix/Bennugd)
+ *  Copyright Â© 2002-2006 Fenix Team (Fenix)
+ *  Copyright Â© 1999-2002 JosÃ© Luis CebriÃ¡n PagÃ¼e (Fenix)
  *
  *  This file is part of Bennu - Game Development
  *
@@ -74,6 +74,7 @@
 #endif
 
 #include "bgddl.h"
+#include "bgd_handles.h"
 
 /*
  * Dynamic memory
@@ -121,7 +122,7 @@ static int kernel_version_type( void )
  *  and may or may not be an approximation.
  */
 
-static int modmem_memory_free( INSTANCE * my, int * params )
+static int modmem_memory_free( INSTANCE * my, intptr_t * params )
 {
 #ifdef WIN32
     MEMORYSTATUS mem ;
@@ -159,7 +160,7 @@ static int modmem_memory_free( INSTANCE * my, int * params )
  *  Return total number of bytes of physical memory
  */
 
-static int modmem_memory_total( INSTANCE * my, int * params )
+static int modmem_memory_total( INSTANCE * my, intptr_t * params )
 {
 #ifdef WIN32
     MEMORYSTATUS mem ;
@@ -193,32 +194,32 @@ static int modmem_memory_total( INSTANCE * my, int * params )
 #endif
 }
 
-static int modmem_memcmp( INSTANCE * my, int * params )
+static int modmem_memcmp( INSTANCE * my, intptr_t * params )
 {
-    return ( memcmp(( void * )params[0], ( void * )params[1], params[2] ) ) ;
+    return ( memcmp( bgd_ptr( params[0] ), bgd_ptr( params[1] ), params[2] ) ) ;
 }
 
-static int modmem_memmove( INSTANCE * my, int * params )
+static int modmem_memmove( INSTANCE * my, intptr_t * params )
 {
-    memmove(( void * )params[0], ( void * )params[1], params[2] ) ;
+    memmove( bgd_ptr( params[0] ), bgd_ptr( params[1] ), params[2] ) ;
     return 1 ;
 }
 
-static int modmem_memcopy( INSTANCE * my, int * params )
+static int modmem_memcopy( INSTANCE * my, intptr_t * params )
 {
-    memcpy(( void * )params[0], ( void * )params[1], params[2] ) ;
+    memcpy( bgd_ptr( params[0] ), bgd_ptr( params[1] ), params[2] ) ;
     return 1 ;
 }
 
-static int modmem_memset( INSTANCE * my, int * params )
+static int modmem_memset( INSTANCE * my, intptr_t * params )
 {
-    memset(( void * )params[0], params[1], params[2] ) ;
+    memset( bgd_ptr( params[0] ), params[1], params[2] ) ;
     return 1 ;
 }
 
-static int modmem_memsetw( INSTANCE * my, int * params )
+static int modmem_memsetw( INSTANCE * my, intptr_t * params )
 {
-    uint16_t * ptr = ( uint16_t * )params[0] ;
+    uint16_t * ptr = ( uint16_t * ) bgd_ptr( params[0] ) ;
     const uint16_t b = params[1] ;
     int n ;
 
@@ -226,9 +227,9 @@ static int modmem_memsetw( INSTANCE * my, int * params )
     return 1 ;
 }
 
-static int modmem_memseti( INSTANCE * my, int * params )
+static int modmem_memseti( INSTANCE * my, intptr_t * params )
 {
-    uint32_t * ptr = ( uint32_t * )params[0] ;
+    uint32_t * ptr = ( uint32_t * ) bgd_ptr( params[0] ) ;
     const uint32_t b = params[1] ;
     int n ;
 
@@ -236,24 +237,28 @@ static int modmem_memseti( INSTANCE * my, int * params )
     return 1 ;
 }
 
-static int modmem_calloc( INSTANCE * my, int * params )
+static int modmem_calloc( INSTANCE * my, intptr_t * params )
 {
-    return (( int ) calloc( params[0], params[1] ) ) ;
+    return bgd_handle_put( calloc( params[0], params[1] ) ) ;
 }
 
-static int modmem_alloc( INSTANCE * my, int * params )
+static int modmem_alloc( INSTANCE * my, intptr_t * params )
 {
-    return (( int ) malloc( params[0] ) ) ;
+    return bgd_handle_put( malloc( params[0] ) ) ;
 }
 
-static int modmem_realloc( INSTANCE * my, int * params )
+static int modmem_realloc( INSTANCE * my, intptr_t * params )
 {
-    return (( int )realloc(( void * )params[0], params[1] ) ) ;
+    {
+    void * p = realloc( bgd_handle_get( params[0] ), params[1] ) ;
+    if ( p ) { bgd_handle_free( params[0] ); return bgd_handle_put( p ); }
+    return 0 ;
+}
 }
 
-static int modmem_free( INSTANCE * my, int * params )
+static int modmem_free( INSTANCE * my, intptr_t * params )
 {
-    free(( void * )params[0] ) ;
+    free( bgd_handle_get( params[0] ) ) ; bgd_handle_free( params[0] ) ;
     return 1 ;
 }
 

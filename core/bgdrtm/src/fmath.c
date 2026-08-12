@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2006-2019 SplinterGU (Fenix/Bennugd)
- *  Copyright © 2002-2006 Fenix Team (Fenix)
- *  Copyright © 1999-2002 José Luis Cebrián Pagüe (Fenix)
+ *  Copyright Â© 2006-2019 SplinterGU (Fenix/Bennugd)
+ *  Copyright Â© 2002-2006 Fenix Team (Fenix)
+ *  Copyright Â© 1999-2002 JosÃ© Luis CebriÃ¡n PagÃ¼e (Fenix)
  *
  *  This file is part of Bennu - Game Development
  *
@@ -27,6 +27,7 @@
  */
 
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "fmath.h"
 
@@ -50,7 +51,7 @@ static fixed * cos_table = NULL ;
 
 fixed ftofix( float x )
 {
-    return ( long )( x * FIXED_PREC );
+    return ( int32_t )( x * FIXED_PREC );
 }
 
 /* --------------------------------------------------------------------------- */

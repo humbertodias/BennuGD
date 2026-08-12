@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2006-2019 SplinterGU (Fenix/Bennugd)
- *  Copyright © 2002-2006 Fenix Team (Fenix)
- *  Copyright © 1999-2002 José Luis Cebrián Pagüe (Fenix)
+ *  Copyright Â© 2006-2019 SplinterGU (Fenix/Bennugd)
+ *  Copyright Â© 2002-2006 Fenix Team (Fenix)
+ *  Copyright Â© 1999-2002 JosÃ© Luis CebriÃ¡n PagÃ¼e (Fenix)
  *
  *  This file is part of Bennu - Game Development
  *
@@ -32,6 +32,7 @@
 #include <stdlib.h>
 
 #include "bgddl.h"
+#include "bgd_handles.h"
 #include "bgdrtm.h"
 
 #include "libgrbase.h"
@@ -89,7 +90,7 @@ static double heuristic( int x, int y )
 /* --------------------------------------------------------------------------- */
 
 /* Uso: pf_open = add(pf_open, this) ; */
-/* La lista permanecerá ordenada */
+/* La lista permanecerÃ¡ ordenada */
 static node * node_add( node * list, node * this )
 {
     node * curr = list ;
@@ -363,9 +364,9 @@ static int path_set_wall( int n )
 }
 
 /* --------------------------------------------------------------------------- */
-/* Funciones de búsqueda de caminos */
+/* Funciones de bÃºsqueda de caminos */
 
-static int modpathfind_path_find( INSTANCE * my, int * params )
+static int modpathfind_path_find( INSTANCE * my, intptr_t * params )
 {
     GRAPH * gpath = bitmap_get( params[0], params[1] ) ;
     if ( !gpath || !gpath->format || gpath->format->depth != 8 ) return 0;
@@ -374,14 +375,14 @@ static int modpathfind_path_find( INSTANCE * my, int * params )
 
 /* --------------------------------------------------------------------------- */
 
-static int modpathfind_path_getxy( INSTANCE * my, int * params )
+static int modpathfind_path_getxy( INSTANCE * my, intptr_t * params )
 {
-    return path_get(( int * )params[0], ( int * )params[1] ) ;
+    return path_get(( int * ) bgd_ptr( params[0] ), ( int * ) bgd_ptr( params[1] ) ) ;
 }
 
 /* --------------------------------------------------------------------------- */
 
-static int modpathfind_path_wall( INSTANCE * my, int * params )
+static int modpathfind_path_wall( INSTANCE * my, intptr_t * params )
 {
     return path_set_wall( params[0] ) ;
 }

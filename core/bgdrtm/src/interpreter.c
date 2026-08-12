@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2006-2019 SplinterGU (Fenix/Bennugd)
- *  Copyright © 2002-2006 Fenix Team (Fenix)
- *  Copyright © 1999-2002 José Luis Cebrián Pagüe (Fenix)
+ *  Copyright Â© 2006-2019 SplinterGU (Fenix/Bennugd)
+ *  Copyright Â© 2002-2006 Fenix Team (Fenix)
+ *  Copyright Â© 1999-2002 JosÃ© Luis CebriÃ¡n PagÃ¼e (Fenix)
  *
  *  This file is part of Bennu - Game Development
  *
@@ -27,6 +27,7 @@
  */
 
 #include <stdio.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -40,6 +41,9 @@
 #include "xstrings.h"
 
 #include <assert.h>
+#include <stdint.h>
+#include <string.h>
+#include "typedef_st.h"
 
 /* ---------------------------------------------------------------------- */
 /* Interpreter's main module                                              */
@@ -63,8 +67,36 @@ int debugger_step               = 0; // execute 1 sentence or 1 procedure or 1 f
 
 /* ---------------------------------------------------------------------- */
 
+
+/* LP64: stack slots are intptr_t. Language ints/floats are still 32-bit.
+ * Signed loads must sign-extend; float/unsigned bit-patterns must zero-extend. */
+static inline float stack_get_f( intptr_t v )
+{
+    uint32_t bits = ( uint32_t ) v ;
+    float f ;
+    memcpy( &f, &bits, sizeof( f ) ) ;
+    return f ;
+}
+
+static inline intptr_t stack_from_f( float f )
+{
+    uint32_t bits ;
+    memcpy( &bits, &f, sizeof( bits ) ) ;
+    return ( intptr_t ) bits ;
+}
+
+static inline intptr_t stack_from_i32( int32_t v )
+{
+    return ( intptr_t ) v ;
+}
+
+static inline intptr_t stack_from_u32( uint32_t v )
+{
+    return ( intptr_t ) v ;
+}
+
 static int stack_dump( INSTANCE * r ) {
-    register int * ptr = &r->stack[1];
+    register intptr_t * ptr = &r->stack[1];
     register int i = 0;
 
     while ( ptr < r->stack_ptr ) {
@@ -72,7 +104,7 @@ static int stack_dump( INSTANCE * r ) {
             i = 0;
             printf( "\n" );
         }
-        printf( "%08X ", *ptr++ );
+        printf( "%08" PRIxPTR " ", ( uintptr_t ) *ptr++ );
         i++;
     }
 
@@ -187,8 +219,8 @@ int instance_go( INSTANCE * r ) {
     if ( debug > 0 ) {
         printf( "\n>>> Instance:%s ProcID:%d StackUsed:%d/%d\n", r->proc->name,
                                                                  LOCDWORD( r, PROCESS_ID ),
-                                                                 ( r->stack_ptr - r->stack ) / sizeof( r->stack[0] ),
-                                                                 ( r->stack[0] & ~STACK_RETURN_VALUE )
+                                                                 ( int )( ( r->stack_ptr - r->stack ) / ( intptr_t ) sizeof( r->stack[0] ) ),
+                                                                 ( int )( r->stack[0] & ~STACK_RETURN_VALUE )
               );
     }
 
@@ -235,9 +267,9 @@ main_loop_instance_go:
             if ( debug > 2 )
             {
                 int c = 45 - stack_dump( r ) * 9;
-                if ( debug > 1 ) printf( "%*.*s[%4u] ", c, c, "", ( ptr - r->code ) );
+                if ( debug > 1 ) printf( "%*.*s[%4u] ", c, c, "", ( unsigned )( ptr - r->code ) );
             }
-            else if ( debug > 1 ) printf( "[%4u] ", ( ptr - r->code ) );
+            else if ( debug > 1 ) printf( "[%4u] ", ( unsigned )( ptr - r->code ) );
             mnemonic_dump( *ptr, ptr[1] );
             fflush(stdout);
         }
@@ -379,7 +411,13 @@ main_loop_instance_go:
                     exit( 0 );
                 }
                 r->stack_ptr -= p->params;
-                *r->stack_ptr = ( *p->func )( r, r->stack_ptr );
+                {
+                    int result = ( *p->func )( r, r->stack_ptr );
+                    if ( p->type == TYPE_FLOAT )
+                        *r->stack_ptr = ( intptr_t )( uint32_t ) result ;
+                    else
+                        *r->stack_ptr = ( intptr_t ) result ;
+                }
                 r->stack_ptr++;
                 ptr += 2;
                 break;
@@ -405,7 +443,7 @@ main_loop_instance_go:
             case MN_PRIVATE | MN_BYTE | MN_UNSIGNED:
             case MN_PRIVATE | MN_STRING:
             case MN_PRIVATE | MN_FLOAT:
-                *r->stack_ptr++ = ( uint32_t ) & PRIDWORD( r, ptr[1] );
+                *r->stack_ptr++ = ( intptr_t ) & PRIDWORD( r, ptr[1] );
                 ptr += 2;
                 break;
 
@@ -417,7 +455,7 @@ main_loop_instance_go:
             case MN_PUBLIC | MN_BYTE | MN_UNSIGNED:
             case MN_PUBLIC | MN_STRING:
             case MN_PUBLIC | MN_FLOAT:
-                *r->stack_ptr++ = ( uint32_t ) & PUBDWORD( r, ptr[1] );
+                *r->stack_ptr++ = ( intptr_t ) & PUBDWORD( r, ptr[1] );
                 ptr += 2;
                 break;
 
@@ -429,7 +467,7 @@ main_loop_instance_go:
             case MN_LOCAL | MN_BYTE | MN_UNSIGNED:
             case MN_LOCAL | MN_STRING:
             case MN_LOCAL | MN_FLOAT:
-                *r->stack_ptr++ = ( uint32_t ) & LOCDWORD( r, ptr[1] );
+                *r->stack_ptr++ = ( intptr_t ) & LOCDWORD( r, ptr[1] );
                 ptr += 2;
                 break;
 
@@ -441,7 +479,7 @@ main_loop_instance_go:
             case MN_GLOBAL | MN_BYTE | MN_UNSIGNED:
             case MN_GLOBAL | MN_STRING:
             case MN_GLOBAL | MN_FLOAT:
-                *r->stack_ptr++ = ( uint32_t ) & GLODWORD( ptr[1] );
+                *r->stack_ptr++ = ( intptr_t ) & GLODWORD( ptr[1] );
                 ptr += 2;
                 break;
 
@@ -455,10 +493,10 @@ main_loop_instance_go:
             case MN_REMOTE | MN_FLOAT:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
-                r->stack_ptr[-1] = ( uint32_t ) & LOCDWORD( i, ptr[1] );
+                r->stack_ptr[-1] = ( intptr_t ) & LOCDWORD( i, ptr[1] );
                 ptr += 2;
                 break;
 
@@ -472,40 +510,56 @@ main_loop_instance_go:
             case MN_REMOTE_PUBLIC | MN_FLOAT:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
-                r->stack_ptr[-1] = ( uint32_t ) & PUBDWORD( i, ptr[1] );
+                r->stack_ptr[-1] = ( intptr_t ) & PUBDWORD( i, ptr[1] );
                 ptr += 2;
                 break;
 
             /* Access to variables DWORD type */
 
             case MN_GET_PRIV:
+                *r->stack_ptr++ = stack_from_i32( PRIINT32( r, ptr[1] ) ) ;
+                ptr += 2 ;
+                break ;
+
             case MN_GET_PRIV | MN_FLOAT:
             case MN_GET_PRIV | MN_UNSIGNED:
-                *r->stack_ptr++ = PRIDWORD( r, ptr[1] );
+                *r->stack_ptr++ = stack_from_u32( PRIDWORD( r, ptr[1] ) ) ;
                 ptr += 2;
                 break;
 
             case MN_GET_PUBLIC:
+                *r->stack_ptr++ = stack_from_i32( PUBINT32( r, ptr[1] ) ) ;
+                ptr += 2 ;
+                break ;
+
             case MN_GET_PUBLIC | MN_FLOAT:
             case MN_GET_PUBLIC | MN_UNSIGNED:
-                *r->stack_ptr++ = PUBDWORD( r, ptr[1] );
+                *r->stack_ptr++ = stack_from_u32( PUBDWORD( r, ptr[1] ) ) ;
                 ptr += 2;
                 break;
 
             case MN_GET_LOCAL:
+                *r->stack_ptr++ = stack_from_i32( LOCINT32( r, ptr[1] ) ) ;
+                ptr += 2 ;
+                break ;
+
             case MN_GET_LOCAL | MN_FLOAT:
             case MN_GET_LOCAL | MN_UNSIGNED:
-                *r->stack_ptr++ = LOCDWORD( r, ptr[1] );
+                *r->stack_ptr++ = stack_from_u32( LOCDWORD( r, ptr[1] ) ) ;
                 ptr += 2;
                 break;
 
             case MN_GET_GLOBAL:
+                *r->stack_ptr++ = stack_from_i32( GLOINT32( ptr[1] ) ) ;
+                ptr += 2 ;
+                break ;
+
             case MN_GET_GLOBAL | MN_FLOAT:
             case MN_GET_GLOBAL | MN_UNSIGNED:
-                *r->stack_ptr++ = GLODWORD( ptr[1] );
+                *r->stack_ptr++ = stack_from_u32( GLODWORD( ptr[1] ) ) ;
                 ptr += 2;
                 break;
 
@@ -514,7 +568,7 @@ main_loop_instance_go:
             case MN_GET_REMOTE | MN_UNSIGNED:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = LOCDWORD( i, ptr[1] );
@@ -526,7 +580,7 @@ main_loop_instance_go:
             case MN_GET_REMOTE_PUBLIC | MN_UNSIGNED:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = PUBDWORD( i, ptr[1] );
@@ -575,7 +629,7 @@ main_loop_instance_go:
             case MN_GET_REMOTE | MN_STRING:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = LOCDWORD( i, ptr[1] );
@@ -586,7 +640,7 @@ main_loop_instance_go:
             case MN_GET_REMOTE_PUBLIC | MN_STRING:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = PUBDWORD( i, ptr[1] );
@@ -651,7 +705,7 @@ main_loop_instance_go:
             case MN_WORD | MN_GET_REMOTE:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = LOCINT16( i, ptr[1] );
@@ -661,7 +715,7 @@ main_loop_instance_go:
             case MN_WORD | MN_GET_REMOTE | MN_UNSIGNED:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = LOCWORD( i, ptr[1] );
@@ -671,7 +725,7 @@ main_loop_instance_go:
             case MN_WORD | MN_GET_REMOTE_PUBLIC:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = PUBINT16( i, ptr[1] );
@@ -681,7 +735,7 @@ main_loop_instance_go:
             case MN_WORD | MN_GET_REMOTE_PUBLIC | MN_UNSIGNED:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = PUBWORD( i, ptr[1] );
@@ -743,7 +797,7 @@ main_loop_instance_go:
             case MN_BYTE | MN_GET_REMOTE:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = LOCINT8( i, ptr[1] );
@@ -753,7 +807,7 @@ main_loop_instance_go:
             case MN_BYTE | MN_GET_REMOTE | MN_UNSIGNED:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = LOCBYTE( i, ptr[1] );
@@ -763,7 +817,7 @@ main_loop_instance_go:
             case MN_BYTE | MN_GET_REMOTE_PUBLIC:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = PUBINT8( i, ptr[1] );
@@ -773,7 +827,7 @@ main_loop_instance_go:
             case MN_BYTE | MN_GET_REMOTE_PUBLIC | MN_UNSIGNED:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = PUBBYTE( i, ptr[1] );
@@ -793,69 +847,69 @@ main_loop_instance_go:
             /* Floating point math */
 
             case MN_FLOAT | MN_NEG:
-                *( float * )&r->stack_ptr[-1] = -*(( float * ) & r->stack_ptr[-1] );
+                r->stack_ptr[-1] = stack_from_f( -stack_get_f( r->stack_ptr[-1] ) ) ;
                 ptr++;
                 break;
 
             case MN_FLOAT | MN_NOT:
-                *( float * )&r->stack_ptr[-1] = ( float ) !*(( float * ) & r->stack_ptr[-1] );
+                r->stack_ptr[-1] = stack_from_f( ( float ) !stack_get_f( r->stack_ptr[-1] ) ) ;
                 ptr++;
                 break;
 
             case MN_FLOAT | MN_ADD:
-                *( float * )&r->stack_ptr[-2] += *(( float * ) & r->stack_ptr[-1] );
+                r->stack_ptr[-2] = stack_from_f( stack_get_f( r->stack_ptr[-2] ) + stack_get_f( r->stack_ptr[-1] ) ) ;
                 r->stack_ptr--;
                 ptr++;
                 break;
 
             case MN_FLOAT | MN_SUB:
-                *( float * )&r->stack_ptr[-2] -= *(( float * ) & r->stack_ptr[-1] );
+                r->stack_ptr[-2] = stack_from_f( stack_get_f( r->stack_ptr[-2] ) - stack_get_f( r->stack_ptr[-1] ) ) ;
                 r->stack_ptr--;
                 ptr++;
                 break;
 
             case MN_FLOAT | MN_MUL:
-                *( float * )&r->stack_ptr[-2] *= *(( float * ) & r->stack_ptr[-1] );
+                r->stack_ptr[-2] = stack_from_f( stack_get_f( r->stack_ptr[-2] ) * stack_get_f( r->stack_ptr[-1] ) ) ;
                 r->stack_ptr--;
                 ptr++;
                 break;
 
             case MN_FLOAT | MN_DIV:
-                *( float * )&r->stack_ptr[-2] /= *(( float * ) & r->stack_ptr[-1] );
+                r->stack_ptr[-2] = stack_from_f( stack_get_f( r->stack_ptr[-2] ) / stack_get_f( r->stack_ptr[-1] ) ) ;
                 r->stack_ptr--;
                 ptr++;
                 break;
 
             case MN_FLOAT2INT:
-                *( int32_t * )&( r->stack_ptr[-ptr[1] - 1] ) = ( int32_t ) * ( float * ) & ( r->stack_ptr[-ptr[1] - 1] );
+                r->stack_ptr[-ptr[1] - 1] = ( intptr_t )( int32_t ) stack_get_f( r->stack_ptr[-ptr[1] - 1] ) ;
                 ptr += 2;
                 break;
 
             case MN_INT2FLOAT:
             case MN_INT2FLOAT | MN_UNSIGNED:
-                *( float * )&( r->stack_ptr[-ptr[1] - 1] ) = ( float ) * ( int32_t * ) & ( r->stack_ptr[-ptr[1] - 1] );
+                r->stack_ptr[-ptr[1] - 1] = stack_from_f( ( float )( int32_t ) r->stack_ptr[-ptr[1] - 1] ) ;
                 ptr += 2;
                 break;
 
             case MN_INT2FLOAT | MN_UNSIGNED | MN_WORD:
-                *( float * )&( r->stack_ptr[-ptr[1] - 1] ) = ( float ) * ( uint16_t * ) & ( r->stack_ptr[-ptr[1] - 1] );
+                r->stack_ptr[-ptr[1] - 1] = stack_from_f( ( float )( uint16_t )( int32_t ) r->stack_ptr[-ptr[1] - 1] ) ;
                 ptr += 2;
                 break;
 
             case MN_INT2FLOAT | MN_UNSIGNED | MN_BYTE:
-                *( float * )&( r->stack_ptr[-ptr[1] - 1] ) = ( float ) * ( uint8_t * ) & ( r->stack_ptr[-ptr[1] - 1] );
+                r->stack_ptr[-ptr[1] - 1] = stack_from_f( ( float )( uint8_t )( int32_t ) r->stack_ptr[-ptr[1] - 1] ) ;
                 ptr += 2;
                 break;
 
             case MN_INT2WORD:
             case MN_INT2WORD | MN_UNSIGNED:
-                *( uint32_t * )&( r->stack_ptr[-ptr[1] - 1] ) = ( int32_t )( uint16_t ) * ( int32_t * ) & ( r->stack_ptr[-ptr[1] - 1] );
+                r->stack_ptr[-ptr[1] - 1] = ( intptr_t )( int32_t )( uint16_t )( int32_t ) r->stack_ptr[-ptr[1] - 1] ;
                 ptr += 2;
                 break;
 
             case MN_INT2BYTE:
             case MN_INT2BYTE | MN_UNSIGNED:
-                *( uint32_t * )&( r->stack_ptr[-ptr[1] - 1] ) = ( int32_t )( uint8_t ) * ( int32_t * ) & ( r->stack_ptr[-ptr[1] - 1] );
+                r->stack_ptr[-ptr[1] - 1] = ( intptr_t )( int32_t )( uint8_t )( int32_t ) r->stack_ptr[-ptr[1] - 1] ;
                 ptr += 2;
                 break;
 
@@ -1157,37 +1211,37 @@ main_loop_instance_go:
             /* Floating point comparisons */
 
             case MN_EQ | MN_FLOAT:
-                r->stack_ptr[-2] = ( *( float * ) & r->stack_ptr[-2] == *( float * ) & r->stack_ptr[-1] );
+                r->stack_ptr[-2] = ( stack_get_f( r->stack_ptr[-2] ) == stack_get_f( r->stack_ptr[-1] ) ) ;
                 r->stack_ptr--;
                 ptr++;
                 break;
 
             case MN_NE | MN_FLOAT:
-                r->stack_ptr[-2] = ( *( float * ) & r->stack_ptr[-2] != *( float * ) & r->stack_ptr[-1] );
+                r->stack_ptr[-2] = ( stack_get_f( r->stack_ptr[-2] ) != stack_get_f( r->stack_ptr[-1] ) ) ;
                 r->stack_ptr--;
                 ptr++;
                 break;
 
             case MN_GTE | MN_FLOAT:
-                r->stack_ptr[-2] = ( *( float * ) & r->stack_ptr[-2] >= *( float * ) & r->stack_ptr[-1] );
+                r->stack_ptr[-2] = ( stack_get_f( r->stack_ptr[-2] ) >= stack_get_f( r->stack_ptr[-1] ) ) ;
                 r->stack_ptr--;
                 ptr++;
                 break;
 
             case MN_LTE | MN_FLOAT:
-                r->stack_ptr[-2] = ( *( float * ) & r->stack_ptr[-2] <= *( float * ) & r->stack_ptr[-1] );
+                r->stack_ptr[-2] = ( stack_get_f( r->stack_ptr[-2] ) <= stack_get_f( r->stack_ptr[-1] ) ) ;
                 r->stack_ptr--;
                 ptr++;
                 break;
 
             case MN_LT | MN_FLOAT:
-                r->stack_ptr[-2] = ( *( float * ) & r->stack_ptr[-2] < *( float * ) & r->stack_ptr[-1] );
+                r->stack_ptr[-2] = ( stack_get_f( r->stack_ptr[-2] ) < stack_get_f( r->stack_ptr[-1] ) ) ;
                 r->stack_ptr--;
                 ptr++;
                 break;
 
             case MN_GT | MN_FLOAT:
-                r->stack_ptr[-2] = ( *( float * ) & r->stack_ptr[-2] > *( float * ) & r->stack_ptr[-1] );
+                r->stack_ptr[-2] = ( stack_get_f( r->stack_ptr[-2] ) > stack_get_f( r->stack_ptr[-1] ) ) ;
                 r->stack_ptr--;
                 ptr++;
                 break;
@@ -1321,7 +1375,7 @@ main_loop_instance_go:
                 break;
 
             case MN_FLOAT2STR:
-                r->stack_ptr[-ptr[1] - 1] = string_ftoa( *( float * ) & r->stack_ptr[-ptr[1] - 1] );
+                r->stack_ptr[-ptr[1] - 1] = string_ftoa( stack_get_f( r->stack_ptr[-ptr[1] - 1] ) ) ;
                 string_use( r->stack_ptr[-ptr[1] - 1] );
                 ptr += 2;
                 break;
@@ -1361,7 +1415,7 @@ main_loop_instance_go:
             case MN_STR2FLOAT:
                 n = r->stack_ptr[-ptr[1] - 1];
                 str = ( char * )string_get( n );
-                *( float * )( &r->stack_ptr[-ptr[1] - 1] ) = str ? ( float )atof( str ) : 0.0f;
+                r->stack_ptr[-ptr[1] - 1] = stack_from_f( str ? ( float )atof( str ) : 0.0f ) ;
                 string_discard( n );
                 ptr += 2;
                 break;

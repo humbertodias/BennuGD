@@ -1,7 +1,7 @@
 /*
- *  Copyright � 2006-2019 SplinterGU (Fenix/Bennugd)
- *  Copyright � 2002-2006 Fenix Team (Fenix)
- *  Copyright � 1999-2002 Jos� Luis Cebri�n Pag�e (Fenix)
+ *  Copyright © 2006-2019 SplinterGU (Fenix/Bennugd)
+ *  Copyright © 2002-2006 Fenix Team (Fenix)
+ *  Copyright © 1999-2002 José Luis Cebrián Pagüe (Fenix)
  *
  *  This file is part of Bennu - Game Development
  *
@@ -194,8 +194,10 @@ static int additive_blend32( int A, int B )
 /* --------------------------------------------------------------------------- */
 
 /* Routine to sort vertexes in y, x order */
-static int compare_vertex_y( const VERTEX * a, const VERTEX * b )
+static int compare_vertex_y( const void * ptr1, const void * ptr2 )
 {
+    const VERTEX * a = ( const VERTEX * ) ptr1 ;
+    const VERTEX * b = ( const VERTEX * ) ptr2 ;
     return ( a->y == b->y ) ? a->x - b->x : a->y - b->y;
 }
 

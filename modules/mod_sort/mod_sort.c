@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2006-2019 SplinterGU (Fenix/Bennugd)
- *  Copyright © 2002-2006 Fenix Team (Fenix)
- *  Copyright © 1999-2002 José Luis Cebrián Pagüe (Fenix)
+ *  Copyright Â© 2006-2019 SplinterGU (Fenix/Bennugd)
+ *  Copyright Â© 2002-2006 Fenix Team (Fenix)
+ *  Copyright Â© 1999-2002 JosÃ© Luis CebriÃ¡n PagÃ¼e (Fenix)
  *
  *  This file is part of Bennu - Game Development
  *
@@ -31,6 +31,7 @@
 #include <string.h>
 
 #include "bgddl.h"
+#include "bgd_handles.h"
 
 #include "arrange.h"
 #include "xstrings.h"
@@ -295,12 +296,12 @@ static int sort_variables( void * data, int key_offset, int key_type, int elemen
  *  variable as a key for sorting order.
  **/
 
-static int modsort_sort( INSTANCE * my, int * params )
+static int modsort_sort( INSTANCE * my, intptr_t * params )
 {
     /* Get the description of the data to be sorted */
 
-    void *          data = ( void * )params[0];
-    DCB_TYPEDEF *   type = ( DCB_TYPEDEF * )params[1];
+    void *          data = bgd_ptr( params[0] );
+    DCB_TYPEDEF *   type = ( DCB_TYPEDEF * ) bgd_ptr( params[1] );
     DCB_TYPEDEF     copy = *type;
     int             vars = params[2];
     int             element_size;
@@ -350,18 +351,18 @@ static int modsort_sort( INSTANCE * my, int * params )
  *  Sorts an array of structs, using the given variable as a key
  **/
 
-static int modsort_ksort( INSTANCE * my, int * params )
+static int modsort_ksort( INSTANCE * my, intptr_t * params )
 {
     /* Get the description of the data to be sorted */
 
-    void *          data = ( void * )params[0];
-    DCB_TYPEDEF *   type = ( DCB_TYPEDEF * )params[1];
+    void *          data = bgd_ptr( params[0] );
+    DCB_TYPEDEF *   type = ( DCB_TYPEDEF * ) bgd_ptr( params[1] );
     DCB_TYPEDEF     copy = *type;
     int             vars = params[2];
     int             element_size;
 
-    void *          key_data = ( void * )params[3];
-    DCB_TYPEDEF *   key_type = ( DCB_TYPEDEF * )params[4];
+    void *          key_data = bgd_ptr( params[3] );
+    DCB_TYPEDEF *   key_type = ( DCB_TYPEDEF * ) bgd_ptr( params[4] );
 
     /* Is it valid? */
 
@@ -418,12 +419,12 @@ static int modsort_ksort( INSTANCE * my, int * params )
  *  or a pointer to an array, unlike the simple SORT version.
  **/
 
-static int modsort_sort_n( INSTANCE * my, int * params )
+static int modsort_sort_n( INSTANCE * my, intptr_t * params )
 {
     /* Get the description of the data to be sorted */
 
-    void *          data = ( void * )params[0];
-    DCB_TYPEDEF *   type = ( DCB_TYPEDEF * )params[1];
+    void *          data = bgd_ptr( params[0] );
+    DCB_TYPEDEF *   type = ( DCB_TYPEDEF * ) bgd_ptr( params[1] );
     DCB_TYPEDEF     copy = *type;
     int             vars = params[2];
     int             element_size;
@@ -476,18 +477,18 @@ static int modsort_sort_n( INSTANCE * my, int * params )
  *  single elements, unlike the previous version of KSORT above.
  **/
 
-static int modsort_ksort_n( INSTANCE * my, int * params )
+static int modsort_ksort_n( INSTANCE * my, intptr_t * params )
 {
     /* Get the description of the data to be sorted */
 
-    void *          data = ( void * )params[0];
-    DCB_TYPEDEF *   type = ( DCB_TYPEDEF * )params[1];
+    void *          data = bgd_ptr( params[0] );
+    DCB_TYPEDEF *   type = ( DCB_TYPEDEF * ) bgd_ptr( params[1] );
     DCB_TYPEDEF     copy = *type;
     int             vars = params[2];
     int             element_size;
 
-    void *          key_data = ( void * )params[3];
-    DCB_TYPEDEF *   key_type = ( DCB_TYPEDEF * )params[4];
+    void *          key_data = bgd_ptr( params[3] );
+    DCB_TYPEDEF *   key_type = ( DCB_TYPEDEF * ) bgd_ptr( params[4] );
 
     /* Is it valid? */
 
@@ -546,7 +547,7 @@ static int modsort_ksort_n( INSTANCE * my, int * params )
  *
  */
 
-static double GetData( uint8_t *Data, int pos, int *params )
+static double GetData( uint8_t *Data, int pos, intptr_t *params )
 {
     if ( params[4] == sizeof( uint8_t ) ) return Data[pos*params[1] + params[3]];
     if ( params[4] == sizeof( uint16_t ) ) return *( uint16_t * )( &Data[pos*params[1] + params[3]] );
@@ -555,7 +556,7 @@ static double GetData( uint8_t *Data, int pos, int *params )
     return 1 ;
 }
 
-static void QuickSort( uint8_t *Data, int inf, int sup, int *params )
+static void QuickSort( uint8_t *Data, int inf, int sup, intptr_t *params )
 {
     register int left, rigth;
     double middle;
@@ -593,10 +594,10 @@ static void QuickSort( uint8_t *Data, int inf, int sup, int *params )
  *      datatype (int=0, float=1)
  */
 
-static int modsort_quicksort( INSTANCE *my, int *params )
+static int modsort_quicksort( INSTANCE *my, intptr_t *params )
 {
 
-    uint8_t *Data = ( uint8_t * )params[0];
+    uint8_t *Data = ( uint8_t * ) bgd_ptr( params[0] );
     QuickSort( Data, 0, params[2] - 1, params );
     return 1 ;
 }

@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2006-2019 SplinterGU (Fenix/Bennugd)
- *  Copyright © 2002-2006 Fenix Team (Fenix)
- *  Copyright © 1999-2002 José Luis Cebrián Pagüe (Fenix)
+ *  Copyright Â© 2006-2013 SplinterGU (Fenix/Bennugd)
+ *  Copyright Â© 2002-2006 Fenix Team (Fenix)
+ *  Copyright Â© 1999-2002 JosÃ© Luis CebriÃ¡n PagÃ¼e (Fenix)
  *
  *  This file is part of Bennu - Game Development
  *
@@ -57,7 +57,7 @@ float ticks_per_frame = 0;
 float fps_partial = 0;
 
 /* --------------------------------------------------------------------------- */
-/* Inicialización y controles de tiempo                                        */
+/* InicializaciÃ³n y controles de tiempo                                        */
 /* --------------------------------------------------------------------------- */
 
 /*
@@ -259,9 +259,9 @@ void gr_refresh_palette()
             }
         }
         if ( scale_screen )
-            SDL_SetColors( scale_screen, palette, 0, 256 ) ;
+            gr_set_surface_palette( scale_screen, palette, 0, 256 ) ;
         else
-            SDL_SetColors( screen, palette, 0, 256 ) ;
+            gr_set_surface_palette( screen, palette, 0, 256 ) ;
     }
 
     palette_changed = 0;
@@ -274,30 +274,45 @@ void gr_draw_frame()
 {
     if ( jump ) return ;
 
-    /* Palette update */
+    /* Actualiza paleta */
 
     if ( palette_changed ) gr_refresh_palette();
 
     if ( !trans_table_updated ) gr_make_trans_table();
 
-    /* lock screen bitmap */
+    /* Bloquea el bitmap de pantalla */
 
     if ( gr_lock_screen() < 0 ) return ;
 
-    /* Draw screen */
+    /* Dibuja la pantalla */
 
     gr_draw_screen( scrbitmap, GLODWORD( librender, RESTORETYPE ), GLODWORD( librender, DUMPTYPE ) );
 
     /* Fading */
 
-    if ( ( fade_on || fade_set ) && frame_completed ) {
+    if ( fade_on || fade_set )
+    {
         gr_fade_step() ;
         if ( background ) background->modified = 1 ;
     }
 
-    /* Update palette and screen */
+    /* Actualiza la paleta y la pantalla */
 
     gr_unlock_screen() ;
+
+}
+
+/* --------------------------------------------------------------------------- */
+
+void __bgdexport( librender, module_initialize )()
+{
+    /* SDL3: timers are always available; SDL_INIT_TIMER was removed */
+}
+
+/* --------------------------------------------------------------------------- */
+
+void __bgdexport( librender, module_finalize )()
+{
 }
 
 /* --------------------------------------------------------------------------- */

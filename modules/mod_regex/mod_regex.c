@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2006-2019 SplinterGU (Fenix/Bennugd)
- *  Copyright © 2002-2006 Fenix Team (Fenix)
- *  Copyright © 1999-2002 José Luis Cebrián Pagüe (Fenix)
+ *  Copyright Â© 2006-2019 SplinterGU (Fenix/Bennugd)
+ *  Copyright Â© 2002-2006 Fenix Team (Fenix)
+ *  Copyright Â© 1999-2002 JosÃ© Luis CebriÃ¡n PagÃ¼e (Fenix)
  *
  *  This file is part of Bennu - Game Development
  *
@@ -36,6 +36,7 @@
 
 #include "files.h"
 #include "xstrings.h"
+#include "bgd_handles.h"
 
 #include "dlvaracc.h"
 #include "regex.h"
@@ -52,7 +53,7 @@ enum {
 /* (usada en tiempo de ejecucion)                                    */
 
 DLVARFIXUP __bgdexport( mod_regex, globals_fixup) [] =   {
-    /* Nombre de variable global, puntero al dato, tamaño del elemento, cantidad de elementos */
+    /* Nombre de variable global, puntero al dato, tamaÃ±o del elemento, cantidad de elementos */
                                 { "regex_reg", NULL, -1, -1 },
                                 { NULL, NULL, -1, -1 }
                                 };
@@ -65,7 +66,7 @@ DLVARFIXUP __bgdexport( mod_regex, globals_fixup) [] =   {
  *  of the match or -1 if none found.
  */
 
-static int modregex_regex (INSTANCE * my, int * params)
+static int modregex_regex (INSTANCE * my, intptr_t * params)
 {
     const char * reg = string_get(params[0]);
     const char * str = string_get(params[1]);
@@ -128,7 +129,7 @@ static int modregex_regex (INSTANCE * my, int * params)
  *  filled with information about the first match.
  */
 
-static int modregex_regex_replace (INSTANCE * my, int * params)
+static int modregex_regex_replace (INSTANCE * my, intptr_t * params)
 {
     const char * reg = string_get(params[0]);
     const char * rep = string_get(params[1]);
@@ -304,11 +305,11 @@ static int modregex_regex_replace (INSTANCE * my, int * params)
  *
  */
 
-static int modregex_split (INSTANCE * my, int * params)
+static int modregex_split (INSTANCE * my, intptr_t * params)
 {
     const char * reg = string_get(params[0]);
     const char * str = string_get(params[1]);
-    int * result_array = (int *)params[2];
+    int * result_array = (int *) bgd_ptr( params[2] );
     int result_array_size = params[3];
     int count = 0;
     int pos, lastpos = 0;
@@ -372,10 +373,10 @@ static int modregex_split (INSTANCE * my, int * params)
  *  resulting string.
  */
 
-static int modregex_join (INSTANCE * my, int * params)
+static int modregex_join (INSTANCE * my, intptr_t * params)
 {
     const char * sep = string_get(params[0]);
-    int * string_array = (int *)params[1];
+    int * string_array = (int *) bgd_ptr( params[1] );
     int count = params[2] ;
     int total_length = 0;
     int sep_len = strlen(sep);

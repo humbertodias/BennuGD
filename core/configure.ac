@@ -35,7 +35,7 @@ case "$target_os" in
         ;;
 
     linux-gnu*)
-        COMMON_CFLAGS="-Wall -DTARGET_LINUX"
+        COMMON_CFLAGS="-std=gnu17 -Wall -DTARGET_LINUX -Wno-error=incompatible-pointer-types -Wno-error=int-conversion"
         COMMON_LDFLAGS="$COMMON_LDFLAGS -lc -ldl"
 
         case "$target_cpu" in
@@ -56,16 +56,22 @@ case "$target_os" in
                 COMMON_LDFLAGS="$COMMON_LDFLAGS $LDFLAGS -L`pwd`/../3rdparty/des-4.04b -ldes -lz"
                 ;;
 
+            *)
+                # x86_64 and other modern arches: OpenSSL DES (same default as BennuGD64)
+                COMMON_CFLAGS="$COMMON_CFLAGS -DUSE_OPENSSL"
+                LIBSSL="crypto"
+                USE_OPENSSL=yes
+                ;;
+
         esac
         ;;
 
     mingw32)
-        INCLUDES="-I/usr/local/include"
-        COMMON_CFLAGS="$COMMON_CFLAGS -DUSE_LIBDES $CFLAGS -I`pwd`/../3rdparty/des-4.04b"
-        COMMON_LDFLAGS="$COMMON_LDFLAGS $LDFLAGS -L`pwd`/../3rdparty/des-4.04b -ldes -L/usr/local/lib -lshlwapi -lkernel32 -Wl,--enable-auto-import"
-	    COMMON_CFLAGS="$COMMON_CFLAGS $INCLUDES -DTARGET_WIN32 -DWIN32 -D_WIN32"
-#	    LIBSSL="eay32"
-        USE_OPENSSL=no
+        # MSYS2 MinGW-w64 (UCRT64/MINGW64) and modern mingw: OpenSSL, not bundled libdes.
+        COMMON_CFLAGS="-std=gnu17 -Wall -DTARGET_WIN32 -DWIN32 -D_WIN32 -DUSE_OPENSSL -Wno-error=incompatible-pointer-types -Wno-error=int-conversion"
+        COMMON_LDFLAGS="$COMMON_LDFLAGS $LDFLAGS -lshlwapi -lkernel32 -Wl,--enable-auto-import -static-libgcc"
+        LIBSSL="crypto"
+        USE_OPENSSL=yes
 	    ;;
 
     mingw32msvc)
@@ -85,9 +91,9 @@ case "$target_os" in
 	    ;;
 
     darwin*)
-        INCLUDES="-I/usr/local/include"
-        COMMON_CFLAGS="-Wall -DTARGET_MAC -DUSE_OPENSSL"
-	    COMMON_LDFLAGS="-L/usr/local/lib"
+        INCLUDES="-I/usr/local/include -I/opt/homebrew/include"
+        COMMON_CFLAGS="-std=gnu17 -Wall -DTARGET_MAC -DUSE_OPENSSL -Wno-error=incompatible-pointer-types -Wno-error=int-conversion"
+	    COMMON_LDFLAGS="-L/usr/local/lib -L/opt/homebrew/lib"
         LIBSSL="crypto"
         USE_OPENSSL=yes
 	    ;;

@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2006-2019 SplinterGU (Fenix/Bennugd)
- *  Copyright © 2002-2006 Fenix Team (Fenix)
- *  Copyright © 1999-2002 José Luis Cebrián Pagüe (Fenix)
+ *  Copyright Â© 2006-2019 SplinterGU (Fenix/Bennugd)
+ *  Copyright Â© 2002-2006 Fenix Team (Fenix)
+ *  Copyright Â© 1999-2002 JosÃ© Luis CebriÃ¡n PagÃ¼e (Fenix)
  *
  *  This file is part of Bennu - Game Development
  *
@@ -27,6 +27,7 @@
  */
 
 #include <stdio.h>
+#include "bgd_handles.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -40,7 +41,7 @@
 
 /* ----------------------------------------------------------------- */
 
-static int modfile_save( INSTANCE * my, int * params )
+static int modfile_save( INSTANCE * my, intptr_t * params )
 {
     file * fp ;
     const char * filename ;
@@ -52,14 +53,14 @@ static int modfile_save( INSTANCE * my, int * params )
     fp = file_open( filename, "wb0" ) ;
     if ( fp )
     {
-        result = savetypes( fp, ( void * )params[1], ( void * )params[2], params[3], 0 );
+        result = savetypes( fp, bgd_ptr( params[1] ), bgd_ptr( params[2] ), params[3], 0 );
         file_close( fp ) ;
     }
     string_discard( params[0] ) ;
     return result ;
 }
 
-static int modfile_load( INSTANCE * my, int * params )
+static int modfile_load( INSTANCE * my, intptr_t * params )
 {
     file * fp ;
     const char * filename ;
@@ -71,14 +72,14 @@ static int modfile_load( INSTANCE * my, int * params )
     fp = file_open( filename, "rb0" ) ;
     if ( fp )
     {
-        result = loadtypes( fp, ( void * )params[1], ( void * )params[2], params[3], 0 );
+        result = loadtypes( fp, bgd_ptr( params[1] ), bgd_ptr( params[2] ), params[3], 0 );
         file_close( fp ) ;
     }
     string_discard( params[0] ) ;
     return result ;
 }
 
-static int modfile_fopen( INSTANCE * my, int * params )
+static int modfile_fopen( INSTANCE * my, intptr_t * params )
 {
     static char * ops[] = { "rb0", "r+b0", "wb0", "rb", "wb6" } ;
     int r ;
@@ -86,74 +87,74 @@ static int modfile_fopen( INSTANCE * my, int * params )
     if ( params[1] < 0 || params[1] > 4 )
         params[0] = 0 ;
 
-    r = ( int ) file_open( string_get( params[0] ), ops[params[1]] ) ;
+    r = bgd_handle_put( file_open( string_get( params[0] ), ops[params[1]] ) ) ;
     string_discard( params[0] ) ;
     return r ;
 }
 
-static int modfile_fclose( INSTANCE * my, int * params )
+static int modfile_fclose( INSTANCE * my, intptr_t * params )
 {
-    file_close(( file * )params[0] ) ;
+    file_close(( file * ) bgd_handle_get( params[0] ) ) ; bgd_handle_free( params[0] ) ;
     return 1 ;
 }
 
-static int modfile_fread( INSTANCE * my, int * params )
+static int modfile_fread( INSTANCE * my, intptr_t * params )
 {
-    return loadtypes(( file * )params[0], ( void * )params[1], ( void * )params[2], params[3], 0 );
+    return loadtypes(( file * ) bgd_handle_get( params[0] ), bgd_ptr( params[1] ), bgd_ptr( params[2] ), params[3], 0 );
 }
 
-static int modfile_fwrite( INSTANCE * my, int * params )
+static int modfile_fwrite( INSTANCE * my, intptr_t * params )
 {
-    return savetypes(( file * )params[0], ( void * )params[1], ( void * )params[2], params[3], 0 );
+    return savetypes(( file * ) bgd_handle_get( params[0] ), bgd_ptr( params[1] ), bgd_ptr( params[2] ), params[3], 0 );
 }
 
-static int modfile_freadC( INSTANCE * my, int * params )
+static int modfile_freadC( INSTANCE * my, intptr_t * params )
 {
-    return file_read(( file * )params[2], ( void * )params[0], params[1] );
+    return file_read(( file * ) bgd_handle_get( params[2] ), bgd_ptr( params[0] ), params[1] );
 }
 
-static int modfile_fwriteC( INSTANCE * my, int * params )
+static int modfile_fwriteC( INSTANCE * my, intptr_t * params )
 {
-    return file_write(( file * )params[2], ( void * )params[0], params[1] );
+    return file_write(( file * ) bgd_handle_get( params[2] ), bgd_ptr( params[0] ), params[1] );
 }
 
-static int modfile_fseek( INSTANCE * my, int * params )
+static int modfile_fseek( INSTANCE * my, intptr_t * params )
 {
-    return file_seek(( file * )params[0], params[1], params[2] ) ;
+    return file_seek(( file * ) bgd_handle_get( params[0] ), params[1], params[2] ) ;
 }
 
-static int modfile_frewind( INSTANCE * my, int * params )
+static int modfile_frewind( INSTANCE * my, intptr_t * params )
 {
-    file_rewind(( file * )params[0] ) ;
+    file_rewind(( file * ) bgd_handle_get( params[0] ) ) ;
     return 1;
 }
 
-static int modfile_ftell( INSTANCE * my, int * params )
+static int modfile_ftell( INSTANCE * my, intptr_t * params )
 {
-    return file_pos(( file * )params[0] ) ;
+    return file_pos(( file * ) bgd_handle_get( params[0] ) ) ;
 }
 
-static int modfile_fflush( INSTANCE * my, int * params )
+static int modfile_fflush( INSTANCE * my, intptr_t * params )
 {
-    return file_flush(( file * )params[0] ) ;
+    return file_flush(( file * ) bgd_handle_get( params[0] ) ) ;
 }
 
-static int modfile_filelength( INSTANCE * my, int * params )
+static int modfile_filelength( INSTANCE * my, intptr_t * params )
 {
-    return file_size(( file * )params[0] ) ;
+    return file_size(( file * ) bgd_handle_get( params[0] ) ) ;
 }
 
-static int modfile_fputs( INSTANCE * my, int * params )
+static int modfile_fputs( INSTANCE * my, intptr_t * params )
 {
     char * str = ( char * ) string_get( params[1] );
-    int r = file_puts(( file * )params[0], str ) ;
-    if ( str[strlen( str )-1] != '\n' ) file_puts(( file * )params[0], "\r\n" ) ;
+    int r = file_puts(( file * ) bgd_handle_get( params[0] ), str ) ;
+    if ( str[strlen( str )-1] != '\n' ) file_puts(( file * ) bgd_handle_get( params[0] ), "\r\n" ) ;
     /*    int r = file_puts ((file *)params[0], string_get(params[1])) ; */
     string_discard( params[1] ) ;
     return r ;
 }
 
-static int modfile_fgets( INSTANCE * my, int * params )
+static int modfile_fgets( INSTANCE * my, intptr_t * params )
 {
     char buffer[1025] ;
     int len, done = 0 ;
@@ -161,7 +162,7 @@ static int modfile_fgets( INSTANCE * my, int * params )
 
     while ( !done )
     {
-        len = file_gets(( file * )params[0], buffer, sizeof( buffer ) - 1) ;
+        len = file_gets(( file * ) bgd_handle_get( params[0] ), buffer, sizeof( buffer ) - 1) ;
         if ( len < 1 ) break;
 
         if ( buffer[len-1] == '\r' || buffer[len-1] == '\n' )
@@ -177,7 +178,7 @@ static int modfile_fgets( INSTANCE * my, int * params )
     return str ;
 }
 
-static int modfile_file( INSTANCE * my, int * params )
+static int modfile_file( INSTANCE * my, intptr_t * params )
 {
     char buffer[1025] ;
     int str = string_new( "" ) ;
@@ -209,26 +210,26 @@ static int modfile_file( INSTANCE * my, int * params )
     return str ;
 }
 
-static int modfile_feof( INSTANCE * my, int * params )
+static int modfile_feof( INSTANCE * my, intptr_t * params )
 {
-    return file_eof(( file * )params[0] ) ;
+    return file_eof(( file * ) bgd_handle_get( params[0] ) ) ;
 }
 
-static int modfile_exists( INSTANCE * my, int * params )
+static int modfile_exists( INSTANCE * my, intptr_t * params )
 {
     int r = file_exists( string_get( params[0] ) ) ;
     string_discard( params[0] ) ;
     return r ;
 }
 
-static int modfile_remove( INSTANCE * my, int * params )
+static int modfile_remove( INSTANCE * my, intptr_t * params )
 {
     int r = file_remove( string_get( params[0] ) ) ;
     string_discard( params[0] ) ;
     return r ;
 }
 
-static int modfile_move( INSTANCE * my, int * params )
+static int modfile_move( INSTANCE * my, intptr_t * params )
 {
     int r = file_move( string_get( params[0] ), string_get( params[1] ) ) ;
     string_discard( params[1] ) ;

@@ -5,9 +5,9 @@
 lib_LTLIBRARIES = libmod_regex.la
 
 libmod_regex_la_SOURCES = mod_regex.c regex.c mod_regex.def
-libmod_regex_la_CFLAGS = $(COMMON_CFLAGS) -I. -I$(BGD_PATH)/include -I$(BGD_PATH)/bgdrtm/include
-libmod_regex_la_LDFLAGS = -s -module -no-undefined -avoid-version
-libmod_regex_la_LIBADD = $(COMMON_LDFLAGS) -L$(BGD_PATH)/bgdrtm/src/.libs -lbgdrtm
+libmod_regex_la_CFLAGS = $(COMMON_CFLAGS) -I. -I$(BGD_PATH)/include -I$(BGD_PATH)/bgdrtm/include -I../libgrbase/
+libmod_regex_la_LDFLAGS = -s -no-undefined -avoid-version
+libmod_regex_la_LIBADD = $(COMMON_LDFLAGS) -L$(BGD_PATH)/bgdrtm/src/.libs -lbgdrtm -L../libgrbase/.libs -lgrbase
 
 ## Make sure these will be cleaned even when they're not built by
 ## default.

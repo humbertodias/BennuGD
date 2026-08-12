@@ -5,9 +5,9 @@
 lib_LTLIBRARIES = libmod_crypt.la
 
 libmod_crypt_la_SOURCES = mod_crypt.c
-libmod_crypt_la_CFLAGS = $(COMMON_CFLAGS) -I$(BGD_PATH)/include
-libmod_crypt_la_LDFLAGS = -s -module -no-undefined -avoid-version
-libmod_crypt_la_LIBADD = $(COMMON_LDFLAGS) -L$(BGD_PATH)/bgdrtm/src/.libs -lbgdrtm
+libmod_crypt_la_CFLAGS = $(COMMON_CFLAGS) -I$(BGD_PATH)/include -I../libgrbase/
+libmod_crypt_la_LDFLAGS = -s -no-undefined -avoid-version
+libmod_crypt_la_LIBADD = $(COMMON_LDFLAGS) -L$(BGD_PATH)/bgdrtm/src/.libs -lbgdrtm -L../libgrbase/.libs -lgrbase
 
 ## Make sure these will be cleaned even when they're not built by
 ## default.
