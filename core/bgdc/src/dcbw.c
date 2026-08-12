@@ -1,7 +1,7 @@
 /*
- *  Copyright ù 2006-2019 SplinterGU (Fenix/Bennugd)
- *  Copyright ù 2002-2006 Fenix Team (Fenix)
- *  Copyright ù 1999-2002 Josù Luis Cebriùn Pagùe (Fenix)
+ *  Copyright ÔøΩ 2006-2019 SplinterGU (Fenix/Bennugd)
+ *  Copyright ÔøΩ 2002-2006 Fenix Team (Fenix)
+ *  Copyright ÔøΩ 1999-2002 JosÔøΩ Luis CebriÔøΩn PagÔøΩe (Fenix)
  *
  *  This file is part of Bennu - Game Development
  *
@@ -593,7 +593,7 @@ int dcb_save( const char * filename, int options, const char * stubname )
 
     file_close( fp );
 
-    /* 6. Mostrar estadùsticas */
+    /* 6. Mostrar estadÔøΩsticas */
 
     printf( "\nFile %s compiled (%ld bytes):\n\n", filename, offset );
     printf( "  Processes              %8d\n", procdef_count );
@@ -1227,7 +1227,7 @@ int dcb_load_lib( const char * filename )
     FREEM( glovaroffs );
     FREEM( locvaroffs );
 
-    /* Recupera los ficheros incluùdos */
+    /* Recupera los ficheros incluÔøΩdos */
 /* N/A
     if ( dcb.data.NFiles )
     {

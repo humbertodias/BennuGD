@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2006-2019 SplinterGU (Fenix/Bennugd)
- *  Copyright © 2002-2006 Fenix Team (Fenix)
- *  Copyright © 1999-2002 JosÈ Luis Cebri·n Pag¸e (Fenix)
+ *  Copyright ù 2006-2019 SplinterGU (Fenix/Bennugd)
+ *  Copyright ù 2002-2006 Fenix Team (Fenix)
+ *  Copyright ù 1999-2002 Josù Luis Cebriùn Pagùe (Fenix)
  *
  *  This file is part of Bennu - Game Development
  *
@@ -35,6 +35,7 @@
 #include <direct.h>
 #endif
 #include "bgdrtm.h"
+#include "bgd_lowmem.h"
 #include "dcb.h"
 #include "dirs.h"
 #include "files.h"
@@ -257,8 +258,9 @@ int dcb_load_from( file * fp, const char * filename, int offset )
 
     if ( memcmp( dcb.data.Header, DCB_MAGIC, sizeof( DCB_MAGIC ) - 1 ) != 0 || dcb.data.Version < 0x0700 ) return 0 ;
 
-    globaldata = calloc( dcb.data.SGlobal + 4, 1 ) ;
-    localdata  = calloc( dcb.data.SLocal + 4, 1 ) ;
+    /* Must be low-32bit addresses: language POINTER slots are still 4 bytes. */
+    globaldata = bgd_low_calloc( dcb.data.SGlobal + 4 ) ;
+    localdata  = bgd_low_calloc( dcb.data.SLocal + 4 ) ;
     localstr   = ( int * ) calloc( dcb.data.NLocStrings + 4, sizeof( int ) ) ;
     dcb.proc   = ( DCB_PROC * ) calloc(( 1 + dcb.data.NProcs ), sizeof( DCB_PROC ) ) ;
     procs      = ( PROCDEF * ) calloc(( 1 + dcb.data.NProcs ), sizeof( PROCDEF ) ) ;
@@ -326,7 +328,7 @@ int dcb_load_from( file * fp, const char * filename, int offset )
 
     string_load( fp, dcb.data.OStrings, dcb.data.OText, dcb.data.NStrings, dcb.data.SText );
 
-    /* Recupera los ficheros incluÌdos */
+    /* Recupera los ficheros incluùdos */
 
     if ( dcb.data.NFiles )
     {
@@ -441,14 +443,14 @@ int dcb_load_from( file * fp, const char * filename, int offset )
 
         if ( dcb.proc[n].data.SPrivate )
         {
-            procs[n].pridata = ( int * )calloc( dcb.proc[n].data.SPrivate, sizeof( char ) ) ; /* El size ya esta calculado en bytes */
+            procs[n].pridata = ( int * )bgd_low_calloc( dcb.proc[n].data.SPrivate ) ; /* El size ya esta calculado en bytes */
             file_seek( fp, offset + dcb.proc[n].data.OPrivate, SEEK_SET ) ;
             file_read( fp, procs[n].pridata, dcb.proc[n].data.SPrivate ) ;      /* *** */
         }
 
         if ( dcb.proc[n].data.SPublic )
         {
-            procs[n].pubdata = ( int * )calloc( dcb.proc[n].data.SPublic, sizeof( char ) ) ; /* El size ya esta calculado en bytes */
+            procs[n].pubdata = ( int * )bgd_low_calloc( dcb.proc[n].data.SPublic ) ; /* El size ya esta calculado en bytes */
             file_seek( fp, offset + dcb.proc[n].data.OPublic, SEEK_SET ) ;
             file_read( fp, procs[n].pubdata, dcb.proc[n].data.SPublic ) ;       /* *** */
         }
