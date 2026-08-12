@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2006-2019 SplinterGU (Fenix/Bennugd)
- *  Copyright © 2002-2006 Fenix Team (Fenix)
- *  Copyright © 1999-2002 JosÈ Luis Cebri·n Pag¸e (Fenix)
+ *  Copyright ù 2006-2019 SplinterGU (Fenix/Bennugd)
+ *  Copyright ù 2002-2006 Fenix Team (Fenix)
+ *  Copyright ù 1999-2002 Josù Luis Cebriùn Pagùe (Fenix)
  *
  *  This file is part of Bennu - Game Development
  *
@@ -106,16 +106,19 @@ void dcb_add_file( const char * filename )
 
     if ( dcb_ef_alloc == dcb_filecount )
     {
-        dcb_files = ( DCB_FILE * )realloc( dcb_files, sizeof( DCB_FILE ) * ( dcb_ef_alloc += 16 ) );
-        if ( !dcb_files ) compile_error( "dcb_add_file: out of memory" );
+        dcb_ef_alloc += 16;
+        dcb_files = ( DCB_FILE * )realloc( dcb_files, sizeof( DCB_FILE ) * dcb_ef_alloc );
+        dcb_fullname = ( char ** )realloc( dcb_fullname, sizeof( char * ) * dcb_ef_alloc );
+        if ( !dcb_files || !dcb_fullname ) compile_error( "dcb_add_file: out of memory" );
     }
 
     /* file is already included ? */
 
     for ( i = 0; i < dcb_filecount; i++ )
-        if ( strcmp( filename, (const char *)dcb_files[i].Name ) == 0 ) return;
+        if ( strcmp( filename, dcb_fullname[i] ) == 0 ) return;
 
-    dcb_files[dcb_filecount].Name = (uint8_t *) strdup( filename );
+    memset( &dcb_files[dcb_filecount], 0, sizeof( DCB_FILE ) );
+    dcb_fullname[dcb_filecount] = strdup( filename );
     dcb_files[dcb_filecount].SFile = size;
 
     dcb_filecount++;
@@ -451,14 +454,10 @@ int dcb_save( const char * filename, int options, const char * stubname )
     OFilesTab = offset;
     dcb.data.OFilesTab   = OFilesTab;                                                       ARRANGE_DWORD( &dcb.data.OFilesTab );
 
-    /* FullPathName */
-    dcb_fullname = calloc( dcb_filecount, sizeof( char * ) );
-
-    /* Cada uno de los archivos incluidos */
+    /* Cada uno de los archivos incluidos (names live in dcb_fullname) */
     for ( n = 0; n < dcb_filecount; n++ )
     {
-        dcb_fullname[n] = (char *)dcb.file[n].Name;                 /* Guardo el Name, porque lo destruyo en SName (es un union) */
-        dcb.file[n].SName = strlen( (const char *)dcb.file[n].Name ) + 1; /* Todavia no hago el ARRANGE de este dato, lo hago luego cuando lo voy a grabar */
+        dcb.file[n].SName = strlen( dcb_fullname[n] ) + 1; /* ARRANGE deferred until write */
         offset += sizeof( DCB_FILE ) + dcb.file[n].SName;
     }
 
@@ -594,7 +593,7 @@ int dcb_save( const char * filename, int options, const char * stubname )
 
     file_close( fp );
 
-    /* 6. Mostrar estadÔøΩsticas */
+    /* 6. Mostrar estadùsticas */
 
     printf( "\nFile %s compiled (%ld bytes):\n\n", filename, offset );
     printf( "  Processes              %8d\n", procdef_count );
@@ -1228,7 +1227,7 @@ int dcb_load_lib( const char * filename )
     FREEM( glovaroffs );
     FREEM( locvaroffs );
 
-    /* Recupera los ficheros incluÌdos */
+    /* Recupera los ficheros incluùdos */
 /* N/A
     if ( dcb.data.NFiles )
     {
