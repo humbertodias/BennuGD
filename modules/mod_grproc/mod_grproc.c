@@ -32,6 +32,7 @@
 
 #include "bgdrtm.h"
 #include "bgddl.h"
+#include "bgd_handles.h"
 #include "dlvaracc.h"
 #include "fmath.h"
 
@@ -396,8 +397,8 @@ static int grproc_get_real_point( INSTANCE * my, intptr_t * params )
         ry /= -LOCINT32( mod_grproc, my, RESOLUTION );
     }
 
-    *( int * )params[1] = rx ;
-    *( int * )params[2] = ry ;
+    *( int * ) bgd_ptr( params[1] ) = rx ;
+    *( int * ) bgd_ptr( params[2] ) = ry ;
 
     return 1 ;
 }

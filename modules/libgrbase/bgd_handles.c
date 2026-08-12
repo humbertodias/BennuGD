@@ -59,7 +59,11 @@ void bgd_handle_free( int handle )
 
 void * bgd_ptr( intptr_t value )
 {
-    void * p = bgd_handle_get( ( int ) value );
-    if ( p ) return p;
+    /* Only small positive ids can be handles; full native addresses must pass through. */
+    if ( value > 0 && value < ( intptr_t ) handles_cap )
+    {
+        void * p = handles[ ( int ) value ];
+        if ( p ) return p;
+    }
     return ( void * ) value;
 }

@@ -32,6 +32,7 @@
 #include <stdlib.h>
 
 #include "bgddl.h"
+#include "bgd_handles.h"
 #include "bgdrtm.h"
 
 #include "libgrbase.h"
@@ -376,7 +377,7 @@ static int modpathfind_path_find( INSTANCE * my, intptr_t * params )
 
 static int modpathfind_path_getxy( INSTANCE * my, intptr_t * params )
 {
-    return path_get(( int * )params[0], ( int * )params[1] ) ;
+    return path_get(( int * ) bgd_ptr( params[0] ), ( int * ) bgd_ptr( params[1] ) ) ;
 }
 
 /* --------------------------------------------------------------------------- */

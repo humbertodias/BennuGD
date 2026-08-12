@@ -39,6 +39,7 @@
 #include "librender.h"
 
 #include "bgddl.h"
+#include "bgd_handles.h"
 #include "dlvaracc.h"
 
 /* --------------------------------------------------------------------------- */
@@ -127,6 +128,7 @@ static int modvideo_list_modes( INSTANCE * my, intptr_t * params )
     int depth = params[0];
     int i, n;
     static int * available_modes = NULL ;
+    static int available_modes_handle = 0 ;
 
     if ( !depth ) depth = ( params[1] & MODE_32BITS ) ? 32 : (( params[1] & MODE_16BITS ) ? 16 : 8 );
 
@@ -152,7 +154,10 @@ static int modvideo_list_modes( INSTANCE * my, intptr_t * params )
     available_modes[i*2  ] = 0;
     available_modes[i*2+1] = 0;
 
-    return ( int )available_modes;
+    if ( available_modes_handle )
+        bgd_handle_free( available_modes_handle );
+    available_modes_handle = bgd_handle_put( available_modes );
+    return available_modes_handle;
 }
 
 /* --------------------------------------------------------------------------- */

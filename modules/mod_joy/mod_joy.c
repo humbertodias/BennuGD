@@ -39,6 +39,7 @@
 /* --------------------------------------------------------------------------- */
 
 #include "bgddl.h"
+#include "bgd_handles.h"
 #include "bgdrtm.h"
 
 #include "libjoy.h"
@@ -198,7 +199,7 @@ static int modjoy_get_ball( INSTANCE * my, intptr_t * params )
 
 static int modjoy_get_accel( INSTANCE * my, intptr_t * params )
 {
-    return ( libjoy_get_accel( ( int * ) params[0], ( int * ) params[1], ( int * ) params[2] ) );
+    return ( libjoy_get_accel( ( int * ) bgd_ptr( params[0] ), ( int * ) bgd_ptr( params[1] ), ( int * ) bgd_ptr( params[2] ) ) );
 }
 
 /* --------------------------------------------------------------------------- */
@@ -313,14 +314,14 @@ static int modjoy_get_hat_specific( INSTANCE * my, intptr_t * params )
 
 static int modjoy_get_ball_specific( INSTANCE * my, intptr_t * params )
 {
-    return ( libjoy_get_ball_specific( params[0], params[1], ( int * ) params[2], ( int * ) params[3] ) );
+    return ( libjoy_get_ball_specific( params[0], params[1], ( int * ) bgd_ptr( params[2] ), ( int * ) bgd_ptr( params[3] ) ) );
 }
 
 /* --------------------------------------------------------------------------- */
 
 static int modjoy_get_accel_specific( INSTANCE * my, intptr_t * params )
 {
-    return ( libjoy_get_accel_specific( params[0], ( int * ) params[1], ( int * ) params[2], ( int * ) params[3] ) );
+    return ( libjoy_get_accel_specific( params[0], ( int * ) bgd_ptr( params[1] ), ( int * ) bgd_ptr( params[2] ), ( int * ) bgd_ptr( params[3] ) ) );
 }
 
 /* ----------------------------------------------------------------- */

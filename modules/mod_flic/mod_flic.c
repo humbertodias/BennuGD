@@ -787,15 +787,15 @@ static int modflic_getinfo( INSTANCE * my, intptr_t * params )
 {
     FLIC * flic = ( FLIC * ) bgd_handle_get( params[0] ) ;
 
-    if ((( int * ) params[1] ) ) *(( int * ) params[1] ) = flic->x ;
-    if ((( int * ) params[2] ) ) *(( int * ) params[2] ) = flic->y ;
-    if ((( int * ) params[3] ) ) *(( int * ) params[3] ) = flic->z ;
-    if ((( int * ) params[4] ) ) *(( int * ) params[4] ) = flic->angle ;
-    if ((( int * ) params[5] ) ) *(( int * ) params[5] ) = flic->size ;
-    if ((( int * ) params[6] ) ) *(( int * ) params[6] ) = flic->flags ;
-    if ((( int * ) params[7] ) ) *(( int * ) params[7] ) = flic->header.frames ;
-    if ((( int * ) params[8] ) ) *(( int * ) params[8] ) = flic->header.width ;
-    if ((( int * ) params[9] ) ) *(( int * ) params[9] ) = flic->header.height ;
+    if ((( int * ) bgd_ptr( params[1] ) ) ) *(( int * ) bgd_ptr( params[1] ) ) = flic->x ;
+    if ((( int * ) bgd_ptr( params[2] ) ) ) *(( int * ) bgd_ptr( params[2] ) ) = flic->y ;
+    if ((( int * ) bgd_ptr( params[3] ) ) ) *(( int * ) bgd_ptr( params[3] ) ) = flic->z ;
+    if ((( int * ) bgd_ptr( params[4] ) ) ) *(( int * ) bgd_ptr( params[4] ) ) = flic->angle ;
+    if ((( int * ) bgd_ptr( params[5] ) ) ) *(( int * ) bgd_ptr( params[5] ) ) = flic->size ;
+    if ((( int * ) bgd_ptr( params[6] ) ) ) *(( int * ) bgd_ptr( params[6] ) ) = flic->flags ;
+    if ((( int * ) bgd_ptr( params[7] ) ) ) *(( int * ) bgd_ptr( params[7] ) ) = flic->header.frames ;
+    if ((( int * ) bgd_ptr( params[8] ) ) ) *(( int * ) bgd_ptr( params[8] ) ) = flic->header.width ;
+    if ((( int * ) bgd_ptr( params[9] ) ) ) *(( int * ) bgd_ptr( params[9] ) ) = flic->header.height ;
 
     return 1 ;
 }
