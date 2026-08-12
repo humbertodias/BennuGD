@@ -44,7 +44,7 @@ case "$target_os" in
                   ;;
 
               *)
-                  CFLAGS+=" -Wall -DTARGET_LINUX"
+                  CFLAGS+=" -std=gnu17 -Wall -DTARGET_LINUX -Wno-error=incompatible-pointer-types -Wno-error=int-conversion"
                   LDFLAGS+=" -lc -ldl"
                   ;;
 
