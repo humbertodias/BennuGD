@@ -1,4 +1,5 @@
 [![CI](https://github.com/humbertodias/BennuGD/actions/workflows/ci.yml/badge.svg)](https://github.com/humbertodias/BennuGD/actions/workflows/ci.yml)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/humbertodias/BennuGD)
 ![GitHub all releases](https://img.shields.io/github/downloads/humbertodias/BennuGD/total)
 
 # BennuGD
