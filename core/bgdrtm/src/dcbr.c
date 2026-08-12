@@ -1,7 +1,7 @@
 /*
- *  Copyright ù 2006-2019 SplinterGU (Fenix/Bennugd)
- *  Copyright ù 2002-2006 Fenix Team (Fenix)
- *  Copyright ù 1999-2002 Josù Luis Cebriùn Pagùe (Fenix)
+ *  Copyright ¬© 2006-2019 SplinterGU (Fenix/Bennugd)
+ *  Copyright ¬© 2002-2006 Fenix Team (Fenix)
+ *  Copyright ¬© 1999-2002 Jos√© Luis Cebri√°n Pag√ºe (Fenix)
  *
  *  This file is part of Bennu - Game Development
  *
@@ -328,7 +328,7 @@ int dcb_load_from( file * fp, const char * filename, int offset )
 
     string_load( fp, dcb.data.OStrings, dcb.data.OText, dcb.data.NStrings, dcb.data.SText );
 
-    /* Recupera los ficheros incluùdos */
+    /* Recupera los ficheros inclu√≠dos */
 
     if ( dcb.data.NFiles )
     {
