@@ -27,6 +27,7 @@
  */
 
 #include <stdio.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -103,7 +104,7 @@ static int stack_dump( INSTANCE * r ) {
             i = 0;
             printf( "\n" );
         }
-        printf( "%08X ", *ptr++ );
+        printf( "%08" PRIxPTR " ", ( uintptr_t ) *ptr++ );
         i++;
     }
 
@@ -218,8 +219,8 @@ int instance_go( INSTANCE * r ) {
     if ( debug > 0 ) {
         printf( "\n>>> Instance:%s ProcID:%d StackUsed:%d/%d\n", r->proc->name,
                                                                  LOCDWORD( r, PROCESS_ID ),
-                                                                 ( r->stack_ptr - r->stack ) / sizeof( r->stack[0] ),
-                                                                 ( r->stack[0] & ~STACK_RETURN_VALUE )
+                                                                 ( int )( ( r->stack_ptr - r->stack ) / ( intptr_t ) sizeof( r->stack[0] ) ),
+                                                                 ( int )( r->stack[0] & ~STACK_RETURN_VALUE )
               );
     }
 
@@ -266,9 +267,9 @@ main_loop_instance_go:
             if ( debug > 2 )
             {
                 int c = 45 - stack_dump( r ) * 9;
-                if ( debug > 1 ) printf( "%*.*s[%4u] ", c, c, "", ( ptr - r->code ) );
+                if ( debug > 1 ) printf( "%*.*s[%4u] ", c, c, "", ( unsigned )( ptr - r->code ) );
             }
-            else if ( debug > 1 ) printf( "[%4u] ", ( ptr - r->code ) );
+            else if ( debug > 1 ) printf( "[%4u] ", ( unsigned )( ptr - r->code ) );
             mnemonic_dump( *ptr, ptr[1] );
             fflush(stdout);
         }
@@ -492,7 +493,7 @@ main_loop_instance_go:
             case MN_REMOTE | MN_FLOAT:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = ( intptr_t ) & LOCDWORD( i, ptr[1] );
@@ -509,7 +510,7 @@ main_loop_instance_go:
             case MN_REMOTE_PUBLIC | MN_FLOAT:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = ( intptr_t ) & PUBDWORD( i, ptr[1] );
@@ -567,7 +568,7 @@ main_loop_instance_go:
             case MN_GET_REMOTE | MN_UNSIGNED:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = LOCDWORD( i, ptr[1] );
@@ -579,7 +580,7 @@ main_loop_instance_go:
             case MN_GET_REMOTE_PUBLIC | MN_UNSIGNED:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = PUBDWORD( i, ptr[1] );
@@ -628,7 +629,7 @@ main_loop_instance_go:
             case MN_GET_REMOTE | MN_STRING:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = LOCDWORD( i, ptr[1] );
@@ -639,7 +640,7 @@ main_loop_instance_go:
             case MN_GET_REMOTE_PUBLIC | MN_STRING:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = PUBDWORD( i, ptr[1] );
@@ -704,7 +705,7 @@ main_loop_instance_go:
             case MN_WORD | MN_GET_REMOTE:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = LOCINT16( i, ptr[1] );
@@ -714,7 +715,7 @@ main_loop_instance_go:
             case MN_WORD | MN_GET_REMOTE | MN_UNSIGNED:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = LOCWORD( i, ptr[1] );
@@ -724,7 +725,7 @@ main_loop_instance_go:
             case MN_WORD | MN_GET_REMOTE_PUBLIC:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = PUBINT16( i, ptr[1] );
@@ -734,7 +735,7 @@ main_loop_instance_go:
             case MN_WORD | MN_GET_REMOTE_PUBLIC | MN_UNSIGNED:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = PUBWORD( i, ptr[1] );
@@ -796,7 +797,7 @@ main_loop_instance_go:
             case MN_BYTE | MN_GET_REMOTE:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = LOCINT8( i, ptr[1] );
@@ -806,7 +807,7 @@ main_loop_instance_go:
             case MN_BYTE | MN_GET_REMOTE | MN_UNSIGNED:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = LOCBYTE( i, ptr[1] );
@@ -816,7 +817,7 @@ main_loop_instance_go:
             case MN_BYTE | MN_GET_REMOTE_PUBLIC:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = PUBINT8( i, ptr[1] );
@@ -826,7 +827,7 @@ main_loop_instance_go:
             case MN_BYTE | MN_GET_REMOTE_PUBLIC | MN_UNSIGNED:
                 i = instance_get( r->stack_ptr[-1] );
                 if ( !i ) {
-                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), r->stack_ptr[-1] );
+                    fprintf( stderr, "ERROR: Runtime error in %s(%d) - Process %d not active\n", r->proc->name, LOCDWORD( r, PROCESS_ID ), ( int ) r->stack_ptr[-1] );
                     exit( 0 );
                 }
                 r->stack_ptr[-1] = PUBBYTE( i, ptr[1] );

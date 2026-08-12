@@ -47,6 +47,7 @@
 #include "files.h"
 
 #include "xstrings.h"
+#include "bgd_handles.h"
 #include "libkey.h"
 #include "libgrbase.h"
 #include "librender.h"
@@ -578,8 +579,15 @@ static char * show_value( DCB_TYPEDEF type, void * data ) {
             return buffer ;
 
         case TYPE_POINTER:
-            _snprintf( buffer, sizeof( buffer ), "= 0x%08X", *( uint32_t * )data ) ;
+        {
+            uint32_t h = *( uint32_t * )data ;
+            void * p = bgd_handle_get( ( int ) h ) ;
+            if ( p )
+                _snprintf( buffer, sizeof( buffer ), "= #%u -> %p", ( unsigned ) h, p ) ;
+            else
+                _snprintf( buffer, sizeof( buffer ), "= #%u", ( unsigned ) h ) ;
             return buffer ;
+        }
 
         default:
             return "?" ;
@@ -777,7 +785,7 @@ static void var2const() {
         result.value = *( float * )( result.data ) ;
     }
 
-    if ( result.type == T_VARIABLE && ( result.var.Type.BaseType[0] == TYPE_DWORD || result.var.Type.BaseType[0] == TYPE_INT ) ) {
+    if ( result.type == T_VARIABLE && ( result.var.Type.BaseType[0] == TYPE_DWORD || result.var.Type.BaseType[0] == TYPE_INT || result.var.Type.BaseType[0] == TYPE_POINTER ) ) {
         result.type = T_CONSTANT ;
         result.value = *( int * )( result.data ) ;
     }
@@ -1060,12 +1068,12 @@ static void eval_value() {
                 return ;
             }
             if ( result.value < 0 ) {
-                console_printf( "¬02Index (%d) less than zero¬07", result.value ) ;
+                console_printf( "¬02Index (%d) less than zero¬07", ( int ) result.value ) ;
                 result.type = T_ERROR ;
                 return ;
             }
             if ( result.value >= i.Type.Count[0] ) {
-                console_printf( "¬02Index (%d) out of bounds¬07", result.value ) ;
+                console_printf( "¬02Index (%d) out of bounds¬07", ( int ) result.value ) ;
                 result.type = T_ERROR ;
                 return ;
             }
