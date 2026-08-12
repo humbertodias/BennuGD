@@ -3,7 +3,9 @@
 
 # BennuGD
 
-Classic [BennuGD](https://www.bennugd.org/) runtime (`bgdc` / `bgdi` + modules), maintained for modern 64-bit hosts with **SDL3**.
+[BennuGD](https://www.bennugd.org/) compiler and runtime (`bgdc` / `bgdi` + modules) for modern 64-bit hosts (SDL3). Keeps the classic language ABI (4-byte `INT`/`POINTER`) so existing BGD1 programs keep working.
+
+Related: [BennuGD64](https://github.com/humbertodias/BennuGD64) — same goal with CMake and statically linked modules.
 
 CI publishes native builds for:
 
@@ -47,30 +49,4 @@ bgdc -help
 bgdi -help
 ```
 
-## Build from source
-
-Dependencies: Autotools, pkg-config, CMake/Ninja (to build SDL3), zlib, libpng, OpenSSL.
-
-```shell
-# Build SDL3 + SDL3_mixer into .deps/
-./scripts/ci/build-sdl3-deps.sh
-source .deps/env.sh
-
-# Native build (pick your OS)
-./build-linux-native.sh release    # Linux
-./build-macos-native.sh release    # macOS
-./build-windows-native.sh release  # MSYS2 UCRT64
-```
-
-Binaries land in `bin/<triplet>/` (for example `bin/x86_64-linux-gnu/`).
-
-Smoke / package helpers used by CI:
-
-```shell
-./scripts/ci/smoke.sh
-./scripts/ci/package.sh
-```
-
-## Related
-
-- [BennuGD64](https://github.com/humbertodias/BennuGD64) — CMake fork with static modules
+Enjoy!
