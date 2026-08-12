@@ -4,9 +4,24 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+
+# GitHub Actions sets DEPS_DIR from github.workspace (Windows paths like D:\...).
+# MSYS2 pkg-config/bash need Unix paths (/d/...); normalize early.
+to_unix_path() {
+  local p="$1"
+  if command -v cygpath >/dev/null 2>&1; then
+    cygpath -u "$p"
+  else
+    printf '%s\n' "$p"
+  fi
+}
+
 DEPS_DIR="${DEPS_DIR:-$ROOT/.deps}"
+DEPS_DIR="$(to_unix_path "$DEPS_DIR")"
 PREFIX="${PREFIX:-$DEPS_DIR/prefix}"
+PREFIX="$(to_unix_path "$PREFIX")"
 SRC_DIR="${SRC_DIR:-$DEPS_DIR/src}"
+SRC_DIR="$(to_unix_path "$SRC_DIR")"
 JOBS="${JOBS:-$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4)}"
 
 SDL3_REF="${SDL3_REF:-release-3.4.14}"
@@ -123,10 +138,21 @@ HOST_OS="$(uname -s)"
 } > "$DEPS_DIR/env.sh"
 
 echo "==> Wrote $DEPS_DIR/env.sh"
+echo "==> env.sh contents:"
+cat "$DEPS_DIR/env.sh"
 # shellcheck disable=SC1091
 source "$DEPS_DIR/env.sh"
-pkg-config --exists --print-errors sdl3
-pkg-config --exists --print-errors sdl3-mixer
+echo "==> PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
+echo "==> looking for .pc under $PREFIX:"
+ls -la "$PREFIX/lib/pkgconfig" "$PREFIX/lib64/pkgconfig" 2>/dev/null || true
+if ! pkg-config --exists --print-errors sdl3; then
+  echo "sdl3.pc not found via pkg-config" >&2
+  exit 1
+fi
+if ! pkg-config --exists --print-errors sdl3-mixer; then
+  echo "sdl3-mixer.pc not found via pkg-config" >&2
+  exit 1
+fi
 pkg-config --modversion sdl3
 pkg-config --modversion sdl3-mixer
 echo "SDL3 deps ready."

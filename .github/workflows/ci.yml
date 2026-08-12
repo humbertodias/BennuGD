@@ -108,17 +108,21 @@ jobs:
           esac
           echo "PLATFORM=${{ matrix.platform }}" >> "$GITHUB_ENV"
           echo "ARCH=${{ matrix.arch }}" >> "$GITHUB_ENV"
+          # Prefer Unix paths for MSYS2 pkg-config/bash (avoid D:\... backslash escapes).
+          if command -v cygpath >/dev/null 2>&1; then
+            echo "DEPS_DIR=$(cygpath -u "$GITHUB_WORKSPACE")/.deps" >> "$GITHUB_ENV"
+          else
+            echo "DEPS_DIR=${GITHUB_WORKSPACE}/.deps" >> "$GITHUB_ENV"
+          fi
 
       - name: Build SDL3 dependencies
         env:
-          DEPS_DIR: ${{ github.workspace }}/.deps
         run: |
           chmod +x scripts/ci/*.sh build-linux-native.sh build-macos-native.sh build-windows-native.sh
           scripts/ci/build-sdl3-deps.sh
 
       - name: Build
         env:
-          DEPS_DIR: ${{ github.workspace }}/.deps
         run: |
           # shellcheck disable=SC1091
           source "$DEPS_DIR/env.sh"
@@ -130,7 +134,6 @@ jobs:
 
       - name: Smoke test binaries
         env:
-          DEPS_DIR: ${{ github.workspace }}/.deps
           SDL_VIDEODRIVER: dummy
         run: |
           # shellcheck disable=SC1091
@@ -144,7 +147,6 @@ jobs:
           PLATFORM: ${{ env.PLATFORM }}
           ARCH: ${{ env.ARCH }}
           DIST_DIR: ${{ github.workspace }}/dist
-          DEPS_DIR: ${{ github.workspace }}/.deps
         run: |
           # shellcheck disable=SC1091
           source "$DEPS_DIR/env.sh"
