@@ -6,7 +6,7 @@ lib_LTLIBRARIES = libmod_mem.la
 
 libmod_mem_la_SOURCES = mod_mem.c
 libmod_mem_la_CFLAGS = $(COMMON_CFLAGS) -I$(BGD_PATH)/include -I../libgrbase/
-libmod_mem_la_LDFLAGS = -s -module -no-undefined -avoid-version
+libmod_mem_la_LDFLAGS = -s -no-undefined -avoid-version
 libmod_mem_la_LIBADD = $(COMMON_LDFLAGS) -L../libgrbase/.libs -lgrbase
 
 ## Make sure these will be cleaned even when they're not built by

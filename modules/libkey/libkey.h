@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2006-2019 SplinterGU (Fenix/Bennugd)
- *  Copyright © 2002-2006 Fenix Team (Fenix)
- *  Copyright © 1999-2002 José Luis Cebrián Pagüe (Fenix)
+ *  Copyright Â© 2006-2013 SplinterGU (Fenix/Bennugd)
+ *  Copyright Â© 2002-2006 Fenix Team (Fenix)
+ *  Copyright Â© 1999-2002 JosÃ© Luis CebriÃ¡n PagÃ¼e (Fenix)
  *
  *  This file is part of Bennu - Game Development
  *
@@ -47,20 +47,21 @@
 
     #ifndef __BGDC__
 
-    #include <SDL.h>
+    #include <SDL3/SDL.h>
+    #include "sdl3_compat.h"
 
     typedef struct _keyequiv {
         int                 sdlk_equiv ;
         struct _keyequiv    * next ;
     } key_equiv ;
 
-    typedef int (* HOTKEY_CALLBACK) (SDL_keysym);
+    typedef int (* HOTKEY_CALLBACK) (Bennu_Keysym);
 
     #ifndef __LIBKEY
     extern DLLIMPORT void hotkey_add(int mod, int sym, HOTKEY_CALLBACK callback);
 
     extern DLLIMPORT key_equiv key_table[] ;           /* Now we have a search table with equivs */
-    extern DLLIMPORT unsigned char * keystate ;        /* Pointer to key states */
+    extern DLLIMPORT const bool * keystate ;        /* Pointer to key states */
     #endif
 
     #endif

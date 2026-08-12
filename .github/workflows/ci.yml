@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, 64b]
+    branches: [main, sdl3]
     tags: ["v*"]
   pull_request:
     branches: [main]
@@ -12,22 +12,78 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  SDL3_REF: release-3.4.14
+  SDL3_MIXER_REF: release-3.2.4
+  BUILD_TYPE: Release
+
 jobs:
   build:
-    name: linux-x86_64
-    runs-on: ubuntu-22.04
+    name: ${{ matrix.platform }}-${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-22.04
+            platform: linux
+            arch: x86_64
+          - runner: windows-latest
+            platform: windows
+            arch: x86_64
+          - runner: macos-latest
+            platform: macos
+            arch: arm64
+
+    defaults:
+      run:
+        # Windows builds use MSYS2 MinGW (UCRT64); other OSes use bash.
+        shell: ${{ matrix.platform == 'windows' && 'msys2 {0}' || 'bash' }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install build dependencies
+      - name: Setup MSYS2 (MinGW UCRT64)
+        if: matrix.platform == 'windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-autotools
+            mingw-w64-ucrt-x86_64-openssl
+            mingw-w64-ucrt-x86_64-zlib
+            mingw-w64-ucrt-x86_64-libpng
+            git
+            curl
+            zip
+            make
+
+      - name: Install Linux build dependencies
+        if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             build-essential automake autoconf libtool pkg-config \
-            libsdl1.2-dev libsdl-mixer1.2-dev \
-            libpng-dev zlib1g-dev libssl-dev
+            cmake ninja-build curl git \
+            libpng-dev zlib1g-dev libssl-dev \
+            libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev \
+            libxfixes-dev libxss-dev libxtst-dev \
+            libgl1-mesa-dev libasound2-dev libpulse-dev libudev-dev \
+            libdbus-1-dev libibus-1.0-dev libwayland-dev libxkbcommon-dev \
+            libdrm-dev libgbm-dev
+
+      - name: Install macOS build dependencies
+        if: matrix.platform == 'macos'
+        run: |
+          brew update
+          brew install automake autoconf libtool pkg-config cmake ninja \
+            openssl@3 libpng || true
 
       - name: Resolve version
         id: meta
@@ -39,28 +95,101 @@ jobs:
           fi
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
-          echo "TARGET=$(uname -m)-linux-gnu" >> "$GITHUB_ENV"
+          case "${{ matrix.platform }}" in
+            macos)
+              echo "TARGET=$(uname -m)-apple-darwin" >> "$GITHUB_ENV"
+              ;;
+            windows)
+              echo "TARGET=$(uname -m)-w64-mingw32" >> "$GITHUB_ENV"
+              ;;
+            *)
+              echo "TARGET=$(uname -m)-linux-gnu" >> "$GITHUB_ENV"
+              ;;
+          esac
+          echo "PLATFORM=${{ matrix.platform }}" >> "$GITHUB_ENV"
+          echo "ARCH=${{ matrix.arch }}" >> "$GITHUB_ENV"
+          # Prefer Unix paths for MSYS2 pkg-config/bash (avoid D:\... backslash escapes).
+          if command -v cygpath >/dev/null 2>&1; then
+            echo "DEPS_DIR=$(cygpath -u "$GITHUB_WORKSPACE")/.deps" >> "$GITHUB_ENV"
+          else
+            echo "DEPS_DIR=${GITHUB_WORKSPACE}/.deps" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build SDL3 dependencies
+        run: |
+          chmod +x scripts/ci/*.sh build-linux-native.sh build-macos-native.sh build-windows-native.sh
+          scripts/ci/build-sdl3-deps.sh
 
       - name: Build
         run: |
-          chmod +x build-linux-native.sh scripts/ci/*.sh
-          ./build-linux-native.sh release
+          # shellcheck disable=SC1091
+          source "$DEPS_DIR/env.sh"
+          case "${{ matrix.platform }}" in
+            macos) ./build-macos-native.sh release ;;
+            windows) ./build-windows-native.sh release ;;
+            *) ./build-linux-native.sh release ;;
+          esac
 
       - name: Smoke test binaries
-        run: scripts/ci/smoke.sh
+        env:
+          SDL_VIDEODRIVER: dummy
+        run: |
+          # shellcheck disable=SC1091
+          source "$DEPS_DIR/env.sh"
+          scripts/ci/smoke.sh
 
       - name: Package
         env:
           VERSION: ${{ steps.meta.outputs.version }}
           TARGET: ${{ env.TARGET }}
+          PLATFORM: ${{ env.PLATFORM }}
+          ARCH: ${{ env.ARCH }}
           DIST_DIR: ${{ github.workspace }}/dist
-        run: scripts/ci/package.sh
+        run: |
+          # shellcheck disable=SC1091
+          source "$DEPS_DIR/env.sh"
+          scripts/ci/package.sh
+          STAGE="dist/stage/bennugd-${VERSION}-${PLATFORM}-${ARCH}"
+          mkdir -p "$STAGE/lib"
+          # Ship runtime SDL3 libs next to binaries for portable artifacts.
+          shopt -s nullglob
+          for pat in \
+            "$PREFIX"/lib/libSDL3*.so* \
+            "$PREFIX"/lib64/libSDL3*.so* \
+            "$PREFIX"/lib/libSDL3*.dylib \
+            "$PREFIX"/lib/libSDL3_mixer*.dylib \
+            "$PREFIX"/bin/SDL3*.dll \
+            "$PREFIX"/bin/libSDL3*.dll
+          do
+            [[ -e "$pat" ]] || continue
+            case "$pat" in
+              *.dll) cp -a "$pat" "$STAGE/" ;;
+              *) cp -a "$pat" "$STAGE/lib/" ;;
+            esac
+          done
+          # MinGW runtime / OpenSSL / zlib / libpng shared deps for Windows artifacts.
+          if [[ "${{ matrix.platform }}" == "windows" ]]; then
+            MINGW_BIN="${MSYSTEM_PREFIX:-/ucrt64}/bin"
+            for pat in \
+              "$MINGW_BIN"/libcrypto-*.dll \
+              "$MINGW_BIN"/libssl-*.dll \
+              "$MINGW_BIN"/libpng*.dll \
+              "$MINGW_BIN"/zlib*.dll \
+              "$MINGW_BIN"/libz*.dll \
+              "$MINGW_BIN"/libwinpthread-1.dll \
+              "$MINGW_BIN"/libgcc_s_seh-1.dll \
+              "$MINGW_BIN"/libstdc++-6.dll
+            do
+              [[ -e "$pat" ]] || continue
+              cp -a "$pat" "$STAGE/"
+            done
+          fi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: bennugd-${{ steps.meta.outputs.version }}-linux-x86_64
-          path: dist/stage/bennugd-${{ steps.meta.outputs.version }}-linux-x86_64/
+          name: bennugd-${{ steps.meta.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}
+          path: dist/stage/bennugd-${{ steps.meta.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}/
           if-no-files-found: error
           retention-days: 14
 
@@ -85,7 +214,14 @@ jobs:
             [[ -d "$art_dir" ]] || continue
             base="$(basename "$art_dir")"
             echo "Packaging $base"
-            tar -C artifacts -czf "$GITHUB_WORKSPACE/release-assets/${base}.tar.gz" "$base"
+            case "$base" in
+              *windows*)
+                (cd artifacts && zip -r "$GITHUB_WORKSPACE/release-assets/${base}.zip" "$base")
+                ;;
+              *)
+                tar -C artifacts -czf "$GITHUB_WORKSPACE/release-assets/${base}.tar.gz" "$base"
+                ;;
+            esac
           done
           ls -lah release-assets
           test -n "$(ls -A release-assets)"
@@ -100,9 +236,15 @@ jobs:
           generate_release_notes: true
           files: release-assets/*
           body: |
-            Native Linux x86_64 build of classic BennuGD (`bgdc` / `bgdi` + modules).
+            Native builds of classic BennuGD (`bgdc` / `bgdi` + modules) on SDL3.
 
-            Built with Autotools against system SDL 1.2, SDL_mixer, libpng, zlib and OpenSSL.
-            Set `LD_LIBRARY_PATH` to the extracted directory when running.
+            - Linux x86_64
+            - Windows x86_64 (MinGW-w64 UCRT64)
+            - macOS arm64
+
+            Built with Autotools against SDL3, SDL3_mixer, libpng, zlib and OpenSSL.
+            Linux/macOS: set `LD_LIBRARY_PATH` / `DYLD_LIBRARY_PATH` to the extracted
+            directory (and its `lib/` folder) when running.
+            Windows: run the `.exe` from the extracted folder (DLLs ship alongside).
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

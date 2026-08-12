@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2006-2019 SplinterGU (Fenix/Bennugd)
- *  Copyright © 2002-2006 Fenix Team (Fenix)
- *  Copyright © 1999-2002 José Luis Cebrián Pagüe (Fenix)
+ *  Copyright Â© 2006-2013 SplinterGU (Fenix/Bennugd)
+ *  Copyright Â© 2002-2006 Fenix Team (Fenix)
+ *  Copyright Â© 1999-2002 JosÃ© Luis CebriÃ¡n PagÃ¼e (Fenix)
  *
  *  This file is part of Bennu - Game Development
  *
@@ -27,9 +27,11 @@
  */
 
 #include "xstrings.h"
-#include <stdint.h>
 
-#include <SDL.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <SDL3/SDL.h>
+#include "sdl3_compat.h"
 
 #include "bgload.h"
 
@@ -72,11 +74,11 @@ int bgDoLoad( void *d )
 
 /* --------------------------------------------------------------------------- */
 
-int bgload( int ( *fn )( const char * ), intptr_t * params )
+int bgload( int ( *fn )(), intptr_t * params )
 {
     bgdata *t = prep( params );
     t->fn = fn;
-    SDL_CreateThread( bgDoLoad, ( void * )t );
+    SDL_CreateThread( bgDoLoad, "bgload", ( void * )t );
     return 0 ;
 }
 

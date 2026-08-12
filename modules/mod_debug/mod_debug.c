@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2006-2019 SplinterGU (Fenix/Bennugd)
- *  Copyright © 2002-2006 Fenix Team (Fenix)
- *  Copyright © 1999-2002 José Luis Cebrián Pagüe (Fenix)
+ *  Copyright Â© 2006-2019 SplinterGU (Fenix/Bennugd)
+ *  Copyright Â© 2002-2006 Fenix Team (Fenix)
+ *  Copyright Â© 1999-2002 JosÃ© Luis CebriÃ¡n PagÃ¼e (Fenix)
  *
  *  This file is part of Bennu - Game Development
  *
@@ -34,7 +34,8 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
+#include "sdl3_compat.h"
 
 #include "bgdcore.h"
 #include "bgdrtm.h"
@@ -116,56 +117,56 @@ DLVARFIXUP __bgdexport( mod_debug, globals_fixup )[] = {
 /* --------------------------------------------------------------------------- */
 
 #define HELPTXT \
-    "¬04Process Info¬07\n"                                                       \
-    "¬05INSTANCES       ¬07  List all running processes\n"                       \
-    "¬05GLOBALS         ¬07  Show global vars with values\n"                     \
-    "¬05LOCALS proc     ¬07  Show a process's local vars\n"                      \
-    "¬05PRIVATES proc   ¬07  Show a process's private vars\n"                    \
-    "¬05PUBLICS proc    ¬07  Show a process's public vars\n"                     \
+    "Â¬04Process InfoÂ¬07\n"                                                       \
+    "Â¬05INSTANCES       Â¬07  List all running processes\n"                       \
+    "Â¬05GLOBALS         Â¬07  Show global vars with values\n"                     \
+    "Â¬05LOCALS proc     Â¬07  Show a process's local vars\n"                      \
+    "Â¬05PRIVATES proc   Â¬07  Show a process's private vars\n"                    \
+    "Â¬05PUBLICS proc    Â¬07  Show a process's public vars\n"                     \
     "\n"                                                                         \
-    "¬04Execution Commands¬07\n"                                                 \
-    "¬05GO              ¬07  Continue the execution\n"                           \
-    "¬05TRACE           ¬07  Execute one instruction and Debug\n"                \
-    "¬05STEP            ¬07  Execute one instruction/process/function and Debug\n" \
-    "¬05NEXTFRAME       ¬07  Continue to next frame\n"                           \
-    "¬05NEXTPROC        ¬07  Continue to next process\n"                         \
+    "Â¬04Execution CommandsÂ¬07\n"                                                 \
+    "Â¬05GO              Â¬07  Continue the execution\n"                           \
+    "Â¬05TRACE           Â¬07  Execute one instruction and Debug\n"                \
+    "Â¬05STEP            Â¬07  Execute one instruction/process/function and Debug\n" \
+    "Â¬05NEXTFRAME       Â¬07  Continue to next frame\n"                           \
+    "Â¬05NEXTPROC        Â¬07  Continue to next process\n"                         \
     "\n"                                                                         \
-    "¬04Breakpoints¬07\n"                                                        \
-    "¬05BREAK           ¬07  List breakpoints\n"                                 \
-    "¬05BREAK proc      ¬07  Set a breakpoint on process\n"                      \
-    "¬05BREAKALL        ¬07  Set breakpoints on all processes\n"                 \
-    "¬05BREAKALLTYPES   ¬07  Set breakpoints on all processes types\n"           \
-    "¬05DELETE proc     ¬07  Delete a breakpoint\n"                              \
-    "¬05DELETEALL       ¬07  Delete all breakpoints on all processess\n"         \
-    "¬05DELETEALLTYPES  ¬07  Delete all breakpoints on all processess types\n"   \
+    "Â¬04BreakpointsÂ¬07\n"                                                        \
+    "Â¬05BREAK           Â¬07  List breakpoints\n"                                 \
+    "Â¬05BREAK proc      Â¬07  Set a breakpoint on process\n"                      \
+    "Â¬05BREAKALL        Â¬07  Set breakpoints on all processes\n"                 \
+    "Â¬05BREAKALLTYPES   Â¬07  Set breakpoints on all processes types\n"           \
+    "Â¬05DELETE proc     Â¬07  Delete a breakpoint\n"                              \
+    "Â¬05DELETEALL       Â¬07  Delete all breakpoints on all processess\n"         \
+    "Â¬05DELETEALLTYPES  Â¬07  Delete all breakpoints on all processess types\n"   \
     "\n"                                                                         \
-    "¬04Process Interaction¬07\n"                                                \
-    "¬05RUN proc [args] ¬07  Run a process\n"                                    \
-    "¬05KILL proc       ¬07  Kill a process\n"                                   \
-    "¬05WAKEUP proc     ¬07  Wakeup a process\n"                                 \
-    "¬05SLEEP proc      ¬07  Sleep a process\n"                                  \
-    "¬05FREEZE proc     ¬07  Freeze a process\n"                                 \
-    "¬05KILLALL proc    ¬07  Kill all process with criteria\n"                   \
-    "¬05WAKEUPALL proc  ¬07  Wakeup all process with criteria\n"                 \
-    "¬05SLEEPALL proc   ¬07  Sleep all process with criteria\n"                  \
-    "¬05FREEZEALL proc  ¬07  Freeze all process with criteria\n"                 \
+    "Â¬04Process InteractionÂ¬07\n"                                                \
+    "Â¬05RUN proc [args] Â¬07  Run a process\n"                                    \
+    "Â¬05KILL proc       Â¬07  Kill a process\n"                                   \
+    "Â¬05WAKEUP proc     Â¬07  Wakeup a process\n"                                 \
+    "Â¬05SLEEP proc      Â¬07  Sleep a process\n"                                  \
+    "Â¬05FREEZE proc     Â¬07  Freeze a process\n"                                 \
+    "Â¬05KILLALL proc    Â¬07  Kill all process with criteria\n"                   \
+    "Â¬05WAKEUPALL proc  Â¬07  Wakeup all process with criteria\n"                 \
+    "Â¬05SLEEPALL proc   Â¬07  Sleep all process with criteria\n"                  \
+    "Â¬05FREEZEALL proc  Â¬07  Freeze all process with criteria\n"                 \
     "\n"                                                                         \
-    "¬04Misc¬07\n"                                                               \
-    "¬05SHOW expression ¬07  Evaluate and show some expression\n"                \
-    "¬05SHOW            ¬07  List all expressions to show\n"                     \
-    "¬05SHOWDEL ExpID   ¬07  Delete an expression (by ID, use SHOW)\n"           \
-    "¬05SHOWDELALL      ¬07  Delete all expression\n"                            \
-    "¬05STRINGS         ¬07  Show all strings in memory\n"                       \
-    "¬05VARS            ¬07  Show internals vars\n"                              \
-    "¬05QUIT            ¬07  Kill the program and exit\n"                        \
+    "Â¬04MiscÂ¬07\n"                                                               \
+    "Â¬05SHOW expression Â¬07  Evaluate and show some expression\n"                \
+    "Â¬05SHOW            Â¬07  List all expressions to show\n"                     \
+    "Â¬05SHOWDEL ExpID   Â¬07  Delete an expression (by ID, use SHOW)\n"           \
+    "Â¬05SHOWDELALL      Â¬07  Delete all expression\n"                            \
+    "Â¬05STRINGS         Â¬07  Show all strings in memory\n"                       \
+    "Â¬05VARS            Â¬07  Show internals vars\n"                              \
+    "Â¬05QUIT            Â¬07  Kill the program and exit\n"                        \
     "\n"                                                                         \
-    "¬04Keys¬07\n"                                                               \
-    "¬05ESC             ¬07  Cancel command\n"                                   \
-    "¬05UP/DOWN         ¬07  Command history navigation\n"                       \
-    "¬05PGUP/PGDN       ¬07  Page Up/Page Down\n"                                \
-    "¬05CTRL+CURSORS    ¬07  Console scroll\n"                                   \
-    "¬05ALT+CURSORS     ¬07  Console window size\n"                              \
-    "¬05SHIFT+CURSORS   ¬07  List window scroll\n"                               \
+    "Â¬04KeysÂ¬07\n"                                                               \
+    "Â¬05ESC             Â¬07  Cancel command\n"                                   \
+    "Â¬05UP/DOWN         Â¬07  Command history navigation\n"                       \
+    "Â¬05PGUP/PGDN       Â¬07  Page Up/Page Down\n"                                \
+    "Â¬05CTRL+CURSORS    Â¬07  Console scroll\n"                                   \
+    "Â¬05ALT+CURSORS     Â¬07  Console window size\n"                              \
+    "Â¬05SHIFT+CURSORS   Â¬07  List window scroll\n"                               \
     "\n"                                                                         \
     "You can evaluate free expressions in the console, and you can see/change\n" \
     "local, public and private vars using the '.' operator\n"                    \
@@ -175,9 +176,9 @@ DLVARFIXUP __bgdexport( mod_debug, globals_fixup )[] = {
 
 #define HOTKEYHELP_SIZE 50
 
-#define HOTKEYHELP1  "¬01F1:¬00?\x03¬01F2:¬00Procs\x03¬01F5:¬00Go\x03¬01F7:¬00Trace\x03¬01F8:¬00Step\x03¬01F10:¬00NFrame\x03¬01F11:¬00NProc"
-#define HOTKEYHELP2  "¬01F1:¬00?\x03¬01F2:¬00Brief\x03¬01F6:¬00Procs\x03¬01F9:¬00Break"
-#define HOTKEYHELP3  "¬01F1:¬00?\x03¬01F2:¬00Brief\x03¬01F3:¬00Loc\x03¬01F4:¬00Pri\x03¬01F5:¬00Pub\x03¬01F6:¬00Types\x03¬01F9:¬00Brk"
+#define HOTKEYHELP1  "Â¬01F1:Â¬00?\x03Â¬01F2:Â¬00Procs\x03Â¬01F5:Â¬00Go\x03Â¬01F7:Â¬00Trace\x03Â¬01F8:Â¬00Step\x03Â¬01F10:Â¬00NFrame\x03Â¬01F11:Â¬00NProc"
+#define HOTKEYHELP2  "Â¬01F1:Â¬00?\x03Â¬01F2:Â¬00Brief\x03Â¬01F6:Â¬00Procs\x03Â¬01F9:Â¬00Break"
+#define HOTKEYHELP3  "Â¬01F1:Â¬00?\x03Â¬01F2:Â¬00Brief\x03Â¬01F3:Â¬00Loc\x03Â¬01F4:Â¬00Pri\x03Â¬01F5:Â¬00Pub\x03Â¬01F6:Â¬00Types\x03Â¬01F9:Â¬00Brk"
 
 /* --------------------------------------------------------------------------- */
 
@@ -322,12 +323,12 @@ static void console_printf( const char *fmt, ... ) {
 
     if ( *text == '[' ) {
         memmove( text + 3, text, strlen( text ) + 1 ) ;
-        memmove( text, "¬08", 3 ) ;
+        memmove( text, "Â¬08", 3 ) ;
         ptr = strchr( text, ']' ) ;
         if ( ptr ) {
             ptr++ ;
             memmove( ptr + 3, ptr, strlen( ptr ) + 1 ) ;
-            memmove( ptr, "¬07", 3 ) ;
+            memmove( ptr, "Â¬07", 3 ) ;
         }
     }
 
@@ -340,7 +341,7 @@ static void console_printf( const char *fmt, ... ) {
             console_putline( iptr ) ;
             iptr = ptr + 1 ;
         }
-        if ( *ptr == '¬' ) {
+        if ( *ptr == 'Â¬' ) {
             ptr++ ;
             if ( isdigit( *ptr ) ) ptr++ ;
             if ( isdigit( *ptr ) ) ptr++ ;
@@ -410,7 +411,7 @@ static void console_getkey( int key, int sym ) {
     if ( key == SDLK_RETURN ) {
 
         console_scroll_pos = 0 ;
-        console_printf( "¬07> %s", console_input ) ;
+        console_printf( "Â¬07> %s", console_input ) ;
         if ( * console_input ) {
             console_putcommand( console_input );
             console_do( console_input ) ;
@@ -419,7 +420,7 @@ static void console_getkey( int key, int sym ) {
         }
     }
 
-    if ( key >= SDLK_SPACE && key <= SDLK_WORLD_95 ) {
+    if ( key >= SDLK_SPACE && key <= 0xFF ) {
         buffer[0] = key ;
         buffer[1] = 0 ;
         strcat( console_input, buffer ) ;
@@ -883,7 +884,7 @@ static void eval_local( DCB_PROC * proc, INSTANCE * i ) {
         }
     }
 
-    console_printf( "¬02Local or private or public variable not found¬07" ) ;
+    console_printf( "Â¬02Local or private or public variable not foundÂ¬07" ) ;
     result.type = T_ERROR ;
 }
 
@@ -907,7 +908,7 @@ static void eval_immediate() {
     }
 
     if ( token.type != IDENTIFIER ) {
-        console_printf( "¬02Not a valid expression¬07" ) ;
+        console_printf( "Â¬02Not a valid expressionÂ¬07" ) ;
         result.type = T_ERROR ;
         return ;
     }
@@ -916,7 +917,7 @@ static void eval_immediate() {
         get_token() ;
         eval_subexpression() ;
         if ( token.name[0] != ')' ) {
-            console_printf( "¬02Unbalanced parens¬07" ) ;
+            console_printf( "Â¬02Unbalanced parensÂ¬07" ) ;
             result.type = T_ERROR ;
             return ;
         }
@@ -929,7 +930,7 @@ static void eval_immediate() {
         eval_immediate() ;
         var2const() ;
         if ( result.type != T_CONSTANT ) {
-            console_printf( "¬02Operand is not a number¬07" ) ;
+            console_printf( "Â¬02Operand is not a numberÂ¬07" ) ;
             result.type = T_ERROR ;
             return ;
         }
@@ -962,14 +963,14 @@ static void eval_immediate() {
                 i = i->next ;
             }
             if ( !i ) {
-                console_printf( "¬02No instance of process %s is active¬07", token.name ) ;
+                console_printf( "Â¬02No instance of process %s is activeÂ¬07", token.name ) ;
                 result.type = T_ERROR ;
                 return ;
             }
 
             get_token() ;
             if ( token.name[0] != '.' ) {
-                console_printf( "¬02Invalid use of a process name¬07" ) ;
+                console_printf( "Â¬02Invalid use of a process nameÂ¬07" ) ;
                 result.type = T_ERROR ;
                 return ;
             }
@@ -979,7 +980,7 @@ static void eval_immediate() {
         }
     }
 
-    console_printf( "¬02Variable does not exist (%s)¬07", token.name ) ;
+    console_printf( "Â¬02Variable does not exist (%s)Â¬07", token.name ) ;
     result.type = T_ERROR ;
     return ;
 }
@@ -1002,7 +1003,7 @@ static void eval_value() {
                 i = instance_get(( int )result.value ) ;
                 if ( !i ) {
                     result.type = T_ERROR ;
-                    console_printf( "¬02Instance %d does not exist¬07", ( int )result.value ) ;
+                    console_printf( "Â¬02Instance %d does not existÂ¬07", ( int )result.value ) ;
                     return ;
                 }
                 get_token() ;
@@ -1012,13 +1013,13 @@ static void eval_value() {
 
             if ( result.type != T_VARIABLE
                     || result.var.Type.BaseType[0] != TYPE_STRUCT ) {
-                console_printf( "¬02%s is not an struct¬07", result.name );
+                console_printf( "Â¬02%s is not an structÂ¬07", result.name );
                 result.type = T_ERROR ;
                 return ;
             }
             get_token() ;
             if ( token.type != IDENTIFIER ) {
-                console_printf( "¬02%s is not a member¬07", token.name ) ;
+                console_printf( "Â¬02%s is not a memberÂ¬07", token.name ) ;
                 result.type = T_ERROR ;
                 return ;
             }
@@ -1030,7 +1031,7 @@ static void eval_value() {
                     break ;
             }
             if ( n == v->NVars ) {
-                console_printf( "¬02%s is not a member¬07", token.name ) ;
+                console_printf( "Â¬02%s is not a memberÂ¬07", token.name ) ;
                 result.type = T_ERROR ;
                 return ;
             }
@@ -1050,7 +1051,7 @@ static void eval_value() {
             char name[230] ;
 
             if ( result.type != T_VARIABLE || result.var.Type.BaseType[0] != TYPE_ARRAY ) {
-                console_printf( "¬02%s is not an array¬07", result.name ) ;
+                console_printf( "Â¬02%s is not an arrayÂ¬07", result.name ) ;
                 result.type = T_ERROR ;
                 return ;
             }
@@ -1063,17 +1064,17 @@ static void eval_value() {
             var2const() ;
 
             if ( result.type != T_CONSTANT ) {
-                console_printf( "¬02%s is not an integer¬07", result.name ) ;
+                console_printf( "Â¬02%s is not an integerÂ¬07", result.name ) ;
                 result.type = T_ERROR ;
                 return ;
             }
             if ( result.value < 0 ) {
-                console_printf( "¬02Index (%d) less than zero¬07", ( int ) result.value ) ;
+                console_printf( "Â¬02Index (%d) less than zeroÂ¬07", ( int ) result.value ) ;
                 result.type = T_ERROR ;
                 return ;
             }
             if ( result.value >= i.Type.Count[0] ) {
-                console_printf( "¬02Index (%d) out of bounds¬07", ( int ) result.value ) ;
+                console_printf( "Â¬02Index (%d) out of boundsÂ¬07", ( int ) result.value ) ;
                 result.type = T_ERROR ;
                 return ;
             }
@@ -1103,13 +1104,13 @@ static void eval_factor() {
         var2const() ;
         if ( result.type != T_CONSTANT ) {
             result.type = T_ERROR ;
-            console_printf( "¬02Operand is not a number¬07" ) ;
+            console_printf( "Â¬02Operand is not a numberÂ¬07" ) ;
             return ;
         }
         if ( !op ) op = 1 ;
         if ( op > 1 && !result.value ) {
             result.type = T_ERROR ;
-            console_printf( "¬02Divide by zero¬07" ) ;
+            console_printf( "Â¬02Divide by zeroÂ¬07" ) ;
             return ;
         }
         if ( op == 1 ) base *= result.value ;
@@ -1139,7 +1140,7 @@ static void eval_subexpression() {
         var2const() ;
         if ( result.type != T_CONSTANT ) {
             result.type = T_ERROR ;
-            console_printf( "¬02Operand is not a number¬07" ) ;
+            console_printf( "Â¬02Operand is not a numberÂ¬07" ) ;
             return ;
         }
         if ( !op ) op = 1 ;
@@ -1169,7 +1170,7 @@ static char * eval_expression( const char * here, int interactive ) {
 
     if ( token.type != NOTOKEN && token.name[0] != ',' && token.name[0] != '=' ) {
         if ( result.type != T_ERROR ) {
-            console_printf( "¬02Invalid expression¬07" );
+            console_printf( "Â¬02Invalid expressionÂ¬07" );
             result.type = T_ERROR;
         }
         return 0;
@@ -1180,16 +1181,16 @@ static char * eval_expression( const char * here, int interactive ) {
 
     if ( result.type == T_CONSTANT ) {
         _snprintf( buffer, sizeof( buffer ), "%s = %g", part, result.value );
-        if ( interactive ) console_printf( "¬07%s", buffer ) ;
+        if ( interactive ) console_printf( "Â¬07%s", buffer ) ;
     } else if ( result.type == T_STRING ) {
-        if ( interactive ) console_printf( "¬07%s = \"%s\"", part, result.name ) ;
+        if ( interactive ) console_printf( "Â¬07%s = \"%s\"", part, result.name ) ;
     } else if ( result.type == T_VARIABLE ) {
         lvalue = result ;
 
         if ( token.name[0] == '=' ) {
             if ( lvalue.type != T_VARIABLE ) {
                 strcpy( buffer, "Not an lvalue" ) ;
-                if ( interactive ) console_printf( "¬02%s¬07", buffer ) ;
+                if ( interactive ) console_printf( "Â¬02%sÂ¬07", buffer ) ;
                 return buffer ;
             }
             get_token() ;
@@ -1216,7 +1217,7 @@ static char * eval_expression( const char * here, int interactive ) {
                 string_use( *( uint32_t * ) lvalue.data ) ;
             } else {
                 strcpy( buffer, "Invalid assignation" ) ;
-                if ( interactive ) console_printf( "¬02%s¬07", buffer ) ;
+                if ( interactive ) console_printf( "Â¬02%sÂ¬07", buffer ) ;
                 return buffer ;
             }
         }
@@ -1290,12 +1291,12 @@ static void console_instance_dump( INSTANCE * father, int indent ) {
         case STATUS_FROZEN      :   strcat( line, "[F]" ) ; break ;
     }
 
-    console_printf( "¬07%s", line ) ;
+    console_printf( "Â¬07%s", line ) ;
 
     if ( !( son = LOCDWORD( mod_debug, i, SON ) ) ) return ;
 
     next = instance_get( son ) ;
-    if ( !next ) console_printf( "¬02\12**PANIC**\7 SON %d does not exist¬07", son ) ;
+    if ( !next ) console_printf( "Â¬02\12**PANIC**\7 SON %d does not existÂ¬07", son ) ;
 
     i = next ;
 
@@ -1330,12 +1331,12 @@ static void console_instance_dump( INSTANCE * father, int indent ) {
                 case STATUS_SLEEPING    :   strcat( line, "[S]" ) ; break ;
                 case STATUS_FROZEN      :   strcat( line, "[F]" ) ; break ;
             }
-            console_printf( "¬07%s", line ) ;
+            console_printf( "Â¬07%s", line ) ;
         }
 
         if ( ( bigbro = LOCDWORD( mod_debug, i, BIGBRO ) ) ) {
             next = instance_get( bigbro ) ;
-            if ( !next ) console_printf( "¬02\12**PANIC**\7 BIGBRO %d does not exist¬07", bigbro ) ;
+            if ( !next ) console_printf( "Â¬02\12**PANIC**\7 BIGBRO %d does not existÂ¬07", bigbro ) ;
             i = next ;
         } else
             break ;
@@ -1343,13 +1344,13 @@ static void console_instance_dump( INSTANCE * father, int indent ) {
 }
 
 /* --------------------------------------------------------------------------- */
-/* Muestra el árbol de instancias */
+/* Muestra el Ã¡rbol de instancias */
 
 static void console_instance_dump_all() {
     INSTANCE * i ;
     int father;
 
-    console_printf( "¬04INSTANCES TREE¬07\n\n" );
+    console_printf( "Â¬04INSTANCES TREEÂ¬07\n\n" );
 
     for ( i = first_instance ; i ; i = i->next ) {
         if ( !( father = LOCDWORD( mod_debug, i, FATHER )) || !instance_get( father ) ) {
@@ -1367,21 +1368,21 @@ static void console_instance_dump_all_brief() {
     char status[30] ;
     int father;
 
-    console_printf( "¬04INSTANCES BRIEF LIST¬07\n\n" );
-    console_printf( "¬04Id         Father     Status        Name¬07\n" );
+    console_printf( "Â¬04INSTANCES BRIEF LISTÂ¬07\n\n" );
+    console_printf( "Â¬04Id         Father     Status        NameÂ¬07\n" );
 
 
     for ( i = first_instance ; i ; i = i->next ) {
         status[0] = '\0';
         if ( LOCDWORD( mod_debug, i, STATUS ) & STATUS_WAITING_MASK )
-            strcpy( status, "¬08wait¬07+" );
+            strcpy( status, "Â¬08waitÂ¬07+" );
 
         switch ( LOCDWORD( mod_debug, i, STATUS ) & ~STATUS_WAITING_MASK ) {
-            case STATUS_DEAD        :   strcat( status, "¬06dead¬07    " ) ; break ;
-            case STATUS_KILLED      :   strcat( status, "¬02killed¬07  " ) ; break ;
-            case STATUS_SLEEPING    :   strcat( status, "¬09sleeping¬07" ) ; break ;
-            case STATUS_FROZEN      :   strcat( status, "¬05frozen¬07  " ) ; break ;
-            case STATUS_RUNNING     :   strcat( status, "¬12running¬07 " ) ; break ;
+            case STATUS_DEAD        :   strcat( status, "Â¬06deadÂ¬07    " ) ; break ;
+            case STATUS_KILLED      :   strcat( status, "Â¬02killedÂ¬07  " ) ; break ;
+            case STATUS_SLEEPING    :   strcat( status, "Â¬09sleepingÂ¬07" ) ; break ;
+            case STATUS_FROZEN      :   strcat( status, "Â¬05frozenÂ¬07  " ) ; break ;
+            case STATUS_RUNNING     :   strcat( status, "Â¬12runningÂ¬07 " ) ; break ;
         }
 
         if ( !( LOCDWORD( mod_debug, i, STATUS ) & STATUS_WAITING_MASK ) )
@@ -1390,9 +1391,9 @@ static void console_instance_dump_all_brief() {
 
         father = LOCDWORD( mod_debug, i, FATHER );
 
-        console_printf( "%-10d %s%-10d¬07 %s ¬15%s¬07\n",
+        console_printf( "%-10d %s%-10dÂ¬07 %s Â¬15%sÂ¬07\n",
                 LOCDWORD( mod_debug, i, PROCESS_ID ),
-                instance_get( father ) ? "" : "¬02",
+                instance_get( father ) ? "" : "Â¬02",
                 father,
                 status,
                 ( dcb.data.NSourceFiles && dcb.proc[i->proc->type].data.ID ) ? getid_name( dcb.proc[i->proc->type].data.ID ) : (( i->proc->type == 0 ) ? "Main" : "proc" )
@@ -1422,19 +1423,19 @@ static void show_list_window() {
     switch ( console_list_current ) {
         case    0:
             console_list_y_max[0] = procdef_count ;
-            systext_puts( scrbitmap, x, y, "¬00¬21PROCESS TYPES", WINDOW_LIST_COLS );
+            systext_puts( scrbitmap, x, y, "Â¬00Â¬21PROCESS TYPES", WINDOW_LIST_COLS );
             for ( n = 0 ; pos + n < procdef_count && y < console_y - CHARHEIGHT ; n++ ) {
                 y += CHARHEIGHT;
                 if ( console_list_y_pos[console_list_current] == pos + n ) {
                     if ( procs[pos + n].breakpoint )
-                        systext_puts( scrbitmap, x, y, "¬15¬19", 1 );
+                        systext_puts( scrbitmap, x, y, "Â¬15Â¬19", 1 );
                     else
-                        systext_puts( scrbitmap, x, y, "¬15¬17", 1 );
+                        systext_puts( scrbitmap, x, y, "Â¬15Â¬17", 1 );
                 } else {
                     if ( procs[pos + n].breakpoint )
-                        systext_puts( scrbitmap, x, y, "¬15¬18", 1 );
+                        systext_puts( scrbitmap, x, y, "Â¬15Â¬18", 1 );
                     else
-                        systext_puts( scrbitmap, x, y, "¬00¬23", 1 );
+                        systext_puts( scrbitmap, x, y, "Â¬00Â¬23", 1 );
                 }
                 if ( console_list_x_pos[console_list_current] < strlen( procs[pos + n].name ) )
                     systext_puts( scrbitmap, x, y, &procs[pos + n].name[console_list_x_pos[console_list_current]], WINDOW_LIST_COLS );
@@ -1452,7 +1453,7 @@ static void show_list_window() {
 
             console_list_y_max[1] = 0 ;
 
-            systext_puts( scrbitmap, x, y, "¬00¬21INSTANCES", WINDOW_LIST_COLS );
+            systext_puts( scrbitmap, x, y, "Â¬00Â¬21INSTANCES", WINDOW_LIST_COLS );
 
             for ( c = 0, n = 0, i = first_instance ; i ; i = i->next, c++ ) {
                 console_list_y_max[1]++ ;
@@ -1464,14 +1465,14 @@ static void show_list_window() {
                     console_list_current_instance = i;
 
                     if ( i->breakpoint )
-                        systext_puts( scrbitmap, x, y, "¬15¬19", 1 );
+                        systext_puts( scrbitmap, x, y, "Â¬15Â¬19", 1 );
                     else
-                        systext_puts( scrbitmap, x, y, "¬15¬17", 1 );
+                        systext_puts( scrbitmap, x, y, "Â¬15Â¬17", 1 );
                 } else {
                     if ( i->breakpoint )
-                        systext_puts( scrbitmap, x, y, "¬15¬18", 1 );
+                        systext_puts( scrbitmap, x, y, "Â¬15Â¬18", 1 );
                     else
-                        systext_puts( scrbitmap, x, y, "¬00¬23", 1 );
+                        systext_puts( scrbitmap, x, y, "Â¬00Â¬23", 1 );
                 }
 
                 status[0] = '\0';
@@ -1517,7 +1518,7 @@ static INSTANCE * findproc( INSTANCE * last, char * action, char * ptr ) {
                 if ( LOCDWORD( mod_debug, i, PROCESS_ID ) == procno )
                     break;
             if ( !i ) {
-                console_printf( "¬02Instance %d does not exist¬07", procno );
+                console_printf( "Â¬02Instance %d does not existÂ¬07", procno );
                 return NULL;
             }
         } else {
@@ -1534,14 +1535,14 @@ static INSTANCE * findproc( INSTANCE * last, char * action, char * ptr ) {
                 if ( dcb.proc[procno].data.ID == dcb.id[n].Code )
                     break;
             if ( procno == ( int )dcb.data.NProcs ) {
-                console_printf( "¬02Unknown process %s¬07", action );
+                console_printf( "Â¬02Unknown process %sÂ¬07", action );
                 return NULL;
             }
             for ( i = last ? last->next : first_instance ; i ; i = i->next )
                 if ( i->proc->type == procno )
                     break;
             if ( !i && !last ) {
-                console_printf( "¬02No instance of process %s created¬07", action );
+                console_printf( "Â¬02No instance of process %s createdÂ¬07", action );
                 return NULL;
             }
         }
@@ -1579,7 +1580,7 @@ static void console_do( const char * command ) {
     }
 
     if ( strcmp( action, "GO" ) == 0 ) {
-        SDL_EnableKeyRepeat( 0, 0 );
+        /* SDL_EnableKeyRepeat removed in SDL3 */ ;
         debugger_show_console = 0;
         debugger_trace = 0;
         debugger_step = 0;
@@ -1589,7 +1590,7 @@ static void console_do( const char * command ) {
     }
 
     if ( strcmp( action, "NEXTFRAME" ) == 0 ) {
-        SDL_EnableKeyRepeat( 0, 0 );
+        /* SDL_EnableKeyRepeat removed in SDL3 */ ;
         debugger_show_console = 0;
         debugger_trace = 0;
         debugger_step = 0;
@@ -1599,7 +1600,7 @@ static void console_do( const char * command ) {
     }
 
     if ( strcmp( action, "NEXTPROC" ) == 0 ) {
-        SDL_EnableKeyRepeat( 0, 0 );
+        /* SDL_EnableKeyRepeat removed in SDL3 */ ;
         debugger_show_console = 0;
         debugger_trace = 0;
         debugger_step = 0;
@@ -1609,7 +1610,7 @@ static void console_do( const char * command ) {
     }
 
     if ( strcmp( action, "TRACE" ) == 0 ) {
-        SDL_EnableKeyRepeat( 0, 0 );
+        /* SDL_EnableKeyRepeat removed in SDL3 */ ;
         debugger_show_console = 0;
         debugger_trace = 1;
         debugger_step = 0;
@@ -1619,7 +1620,7 @@ static void console_do( const char * command ) {
     }
 
     if ( strcmp( action, "STEP" ) == 0 ) {
-        SDL_EnableKeyRepeat( 0, 0 );
+        /* SDL_EnableKeyRepeat removed in SDL3 */ ;
         debugger_show_console = 0;
         debugger_trace = 0;
         debugger_step = 1;
@@ -1636,10 +1637,10 @@ static void console_do( const char * command ) {
                     if ( LOCDWORD( mod_debug, i, PROCESS_ID ) == procno )
                         break;
                 if ( !i ) {
-                    console_printf( "¬02Instance %d does not exist¬07", procno );
+                    console_printf( "Â¬02Instance %d does not existÂ¬07", procno );
                 } else {
                     i->breakpoint = 1;
-                    console_printf( "¬07OK" );
+                    console_printf( "Â¬07OK" );
                 }
             } else {
                 aptr = action;
@@ -1651,10 +1652,10 @@ static void console_do( const char * command ) {
                 if ( *action ) {
                     p = procdef_get_by_name( action );
                     if ( !p ) {
-                        console_printf( "¬02Process type %d does not exist¬07", action );
+                        console_printf( "Â¬02Process type %d does not existÂ¬07", action );
                     } else {
                         p->breakpoint = 1;
-                        console_printf( "¬07OK" );
+                        console_printf( "Â¬07OK" );
                     }
                 }
             }
@@ -1663,10 +1664,10 @@ static void console_do( const char * command ) {
             for ( n = 0 ; n < procdef_count; n++ ) {
                 if ( procs[n].breakpoint ) {
                     if ( !f ) {
-                        console_printf( "¬04PROCESS TYPE BREAKPOINTS¬07\n\n" );
+                        console_printf( "Â¬04PROCESS TYPE BREAKPOINTSÂ¬07\n\n" );
                         f = 1;
                     }
-                    console_printf( "¬07%s\n", procs[n].name );
+                    console_printf( "Â¬07%s\n", procs[n].name );
                 }
             }
             if ( f )
@@ -1676,10 +1677,10 @@ static void console_do( const char * command ) {
             for ( i = first_instance ; i ; i = i->next ) {
                 if ( i->breakpoint ) {
                     if ( !f ) {
-                        console_printf( "¬04PROCESS BREAKPOINTS¬07\n\n" );
+                        console_printf( "Â¬04PROCESS BREAKPOINTSÂ¬07\n\n" );
                         f = 1;
                     }
-                    console_printf( "¬07%d", LOCDWORD( mod_debug, i, PROCESS_ID ) );
+                    console_printf( "Â¬07%d", LOCDWORD( mod_debug, i, PROCESS_ID ) );
                 }
             }
             if ( f ) console_printf( "\n" );
@@ -1689,25 +1690,25 @@ static void console_do( const char * command ) {
 
     if ( strcmp( action, "BREAKALL" ) == 0 ) {
         for ( i = first_instance ; i ; i = i->next ) i->breakpoint = 1;
-        console_printf( "¬07OK" );
+        console_printf( "Â¬07OK" );
         return ;
     }
 
     if ( strcmp( action, "BREAKALLTYPES" ) == 0 ) {
         for ( n = 0 ; n < procdef_count; n++ ) procs[n].breakpoint = 1;
-        console_printf( "¬07OK" );
+        console_printf( "Â¬07OK" );
         return ;
     }
 
     if ( strcmp( action, "DELETEALL" ) == 0 ) {
         for ( i = first_instance ; i ; i = i->next ) i->breakpoint = 0;
-        console_printf( "¬07OK" );
+        console_printf( "Â¬07OK" );
         return ;
     }
 
     if ( strcmp( action, "DELETEALLTYPES" ) == 0 ) {
         for ( n = 0 ; n < procdef_count; n++ ) procs[n].breakpoint = 0;
-        console_printf( "¬07OK" );
+        console_printf( "Â¬07OK" );
         return ;
     }
 
@@ -1719,10 +1720,10 @@ static void console_do( const char * command ) {
                     if ( LOCDWORD( mod_debug, i, PROCESS_ID ) == procno )
                         break;
                 if ( !i ) {
-                    console_printf( "¬02Instance %d does not exist¬07", procno );
+                    console_printf( "Â¬02Instance %d does not existÂ¬07", procno );
                 } else {
                     i->breakpoint = 0;
-                    console_printf( "¬07OK" );
+                    console_printf( "Â¬07OK" );
                 }
             } else {
                 aptr = action;
@@ -1733,10 +1734,10 @@ static void console_do( const char * command ) {
 
                 p = procdef_get_by_name( action );
                 if ( !p ) {
-                    console_printf( "¬02Process type %d does not exist¬07", procno );
+                    console_printf( "Â¬02Process type %d does not existÂ¬07", procno );
                 } else {
                     p->breakpoint = 0;
-                    console_printf( "¬07OK" );
+                    console_printf( "Â¬07OK" );
                 }
             }
         }
@@ -1778,7 +1779,7 @@ static void console_do( const char * command ) {
             }
         } else if ( show_public ) {
             if ( !i ) {
-                console_printf( "¬07Use: PUBLICS process" );
+                console_printf( "Â¬07Use: PUBLICS process" );
                 return;
             }
             for ( var = 0 ; var < dcb.proc[i->proc->type].data.NPubVars ; var++ ) {
@@ -1792,7 +1793,7 @@ static void console_do( const char * command ) {
             }
         } else {
             if ( !i ) {
-                console_printf( "¬07Use: PRIVATES process" );
+                console_printf( "Â¬07Use: PRIVATES process" );
                 return;
             }
             for ( var = 0 ; var < dcb.proc[i->proc->type].data.NPriVars ; var++ ) {
@@ -1814,13 +1815,13 @@ static void console_do( const char * command ) {
             char * res = eval_expression( ptr, 0 );
 
             if ( !res || result.type == T_STRING ) {
-                console_printf( "¬02Invalid argument¬07" );
+                console_printf( "Â¬02Invalid argumentÂ¬07" );
                 return ;
             }
 
             for ( n = 0; n < MAX_EXPRESSIONS; n++ ) {
                 if ( show_expression[n] && !strcmp( show_expression[n], ptr ) ) {
-                    console_printf( "¬02Already exists¬07" );
+                    console_printf( "Â¬02Already existsÂ¬07" );
                     return ;
                 }
             }
@@ -1829,12 +1830,12 @@ static void console_do( const char * command ) {
                 if ( !show_expression[n] ) {
                     show_expression[n] = strdup( ptr );
                     show_expression_count++;
-                    console_printf( "¬07OK" );
+                    console_printf( "Â¬07OK" );
                     return;
                 }
             }
 
-            console_printf( "¬02No more expressions are possibles¬07" );
+            console_printf( "Â¬02No more expressions are possiblesÂ¬07" );
         } else {
             int nn = 0;
             for ( n = 0; n < MAX_EXPRESSIONS; n++ ) {
@@ -1844,7 +1845,7 @@ static void console_do( const char * command ) {
                 }
             }
 
-            if ( !nn ) console_printf( "¬02No expressions availables¬07" );
+            if ( !nn ) console_printf( "Â¬02No expressions availablesÂ¬07" );
         }
 
         return;
@@ -1863,13 +1864,13 @@ static void console_do( const char * command ) {
                     free( show_expression[pos] );
                     show_expression[pos] = NULL;
                     show_expression_count--;
-                    console_printf( "¬07OK" );
+                    console_printf( "Â¬07OK" );
                     return;
                 }
             }
         }
 
-        console_printf( "¬02Invalid argument¬07" );
+        console_printf( "Â¬02Invalid argumentÂ¬07" );
 
         return;
     }
@@ -1882,7 +1883,7 @@ static void console_do( const char * command ) {
                 show_expression_count--;
             }
         }
-        console_printf( "¬07OK" );
+        console_printf( "Â¬07OK" );
         return;
     }
 
@@ -1890,11 +1891,11 @@ static void console_do( const char * command ) {
         for ( var = 0 ; var < N_CONSOLE_VARS ; var++ ) {
             switch ( console_vars[var].type ) {
                 case CON_DWORD:
-                    console_printf( "¬07%s = %d\n", console_vars[var].name, *( int * )console_vars[var].value ) ;
+                    console_printf( "Â¬07%s = %d\n", console_vars[var].name, *( int * )console_vars[var].value ) ;
                     break;
 
                 case CON_DWORD_HEX:
-                    console_printf( "¬07%s = %08Xh\n", console_vars[var].name, *( int * )console_vars[var].value ) ;
+                    console_printf( "Â¬07%s = %08Xh\n", console_vars[var].name, *( int * )console_vars[var].value ) ;
                     break;
             }
         }
@@ -1916,7 +1917,7 @@ static void console_do( const char * command ) {
                 p = procdef_get_by_name( action );
                 if ( p ) {
                     token_ptr = ptr ;
-                    console_printf( "¬07%s", ptr );
+                    console_printf( "Â¬07%s", ptr );
                     inst = instance_new( p, NULL );
 
                     for ( i = 0; i < p->params; i++ ) {
@@ -1948,7 +1949,7 @@ static void console_do( const char * command ) {
                                     case    TYPE_STRING:
                                     default:
                                         instance_destroy( inst );
-                                        console_printf( "¬02Invalid argument %d¬07", i );
+                                        console_printf( "Â¬02Invalid argument %dÂ¬07", i );
                                         return;
                                 }
                                 break;
@@ -1961,13 +1962,13 @@ static void console_do( const char * command ) {
                             case T_VARIABLE:
                             default:
                                 instance_destroy( inst );
-                                console_printf( "¬02Invalid argument %d¬07", i );
+                                console_printf( "Â¬02Invalid argument %dÂ¬07", i );
                                 return;
                         }
                     }
-                    console_printf( "¬07Process %s is executed", p->name );
+                    console_printf( "Â¬07Process %s is executed", p->name );
                 } else {
-                    console_printf( "¬02Process %s not found¬07", action );
+                    console_printf( "Â¬02Process %s not foundÂ¬07", action );
                 }
                 return;
             }
@@ -2009,7 +2010,7 @@ static void console_do( const char * command ) {
         }
 
         if ( oaction ) free( oaction );
-        if ( found ) console_printf( "¬07OK" );
+        if ( found ) console_printf( "Â¬07OK" );
         return ;
     }
 
@@ -2039,7 +2040,7 @@ static void console_do( const char * command ) {
                 LOCDWORD( mod_debug, i, STATUS ) = ( LOCDWORD( mod_debug, i, STATUS ) & STATUS_WAITING_MASK ) | STATUS_FROZEN ;
                 break;
         }
-        console_printf( "¬07OK" );
+        console_printf( "Â¬07OK" );
         return ;
     }
 
@@ -2060,7 +2061,7 @@ static void console_do( const char * command ) {
                         if ( result.type != T_ERROR )
                             *( int * )console_vars[var].value = ( int ) result.value ;
                     }
-                    console_printf( "¬07%s = %d", console_vars[var].name, *( int * )console_vars[var].value ) ;
+                    console_printf( "Â¬07%s = %d", console_vars[var].name, *( int * )console_vars[var].value ) ;
                     return ;
 
                 case CON_DWORD_HEX:
@@ -2070,7 +2071,7 @@ static void console_do( const char * command ) {
                         if ( result.type != T_ERROR )
                             *( int * )console_vars[var].value = ( int ) result.value ;
                     }
-                    console_printf( "¬07%s = %08Xh\n", console_vars[var].name, *( int * )console_vars[var].value ) ;
+                    console_printf( "Â¬07%s = %08Xh\n", console_vars[var].name, *( int * )console_vars[var].value ) ;
                     return ;
             }
         }
@@ -2085,7 +2086,7 @@ static void console_do( const char * command ) {
 /* Hotkey for exit (ALT+X)                                                     */
 /* --------------------------------------------------------------------------- */
 
-static int force_exit_cb( SDL_keysym k ) {
+static int force_exit_cb( Bennu_Keysym k ) {
     debugger_show_console = 0;
     exit_value = 0;
     must_exit = 1 ;
@@ -2096,16 +2097,16 @@ static int force_exit_cb( SDL_keysym k ) {
 /* Hotkeys for activate/deactivate console                                     */
 /* --------------------------------------------------------------------------- */
 
-static int console_keyboard_handler_cb( SDL_keysym k ) {
+static int console_keyboard_handler_cb( Bennu_Keysym k ) {
     char cmd[256];
 
     if ( dcb.data.NSourceFiles ) {
         if (( k.mod & KMOD_LALT ) && k.sym == SDLK_c ) {
             if ( !debugger_show_console ) {
-                SDL_EnableKeyRepeat( 250, 50 );
+                /* SDL_EnableKeyRepeat removed in SDL3 */ ;
                 debugger_show_console = 1;
             } else {
-                SDL_EnableKeyRepeat( 0, 0 );
+                /* SDL_EnableKeyRepeat removed in SDL3 */ ;
                 debugger_show_console = 0;
             }
             return 1;
@@ -2168,7 +2169,7 @@ static int console_keyboard_handler_cb( SDL_keysym k ) {
                 if ( console_list_current_instance && console_list_current == 1 ) {
                     if ( k.sym == SDLK_F3 ) {
                         int id = LOCDWORD( mod_debug, console_list_current_instance, PROCESS_ID ) ;
-                        console_printf( "¬04%s (%d) LOCALS¬07\n\n",
+                        console_printf( "Â¬04%s (%d) LOCALSÂ¬07\n\n",
                                 ( dcb.data.NSourceFiles && dcb.proc[console_list_current_instance->proc->type].data.ID ) ? getid_name( dcb.proc[console_list_current_instance->proc->type].data.ID ) : (( console_list_current_instance->proc->type == 0 ) ? "Main" : "proc" ),id );
                         sprintf( cmd, "LOCALS %d", id ) ;
                         console_do( cmd );
@@ -2177,7 +2178,7 @@ static int console_keyboard_handler_cb( SDL_keysym k ) {
 
                     if ( k.sym == SDLK_F4 ) {
                         int id = LOCDWORD( mod_debug, console_list_current_instance, PROCESS_ID ) ;
-                        console_printf( "¬04%s (%d) PRIVATES¬07\n\n",
+                        console_printf( "Â¬04%s (%d) PRIVATESÂ¬07\n\n",
                                 ( dcb.data.NSourceFiles && dcb.proc[console_list_current_instance->proc->type].data.ID ) ? getid_name( dcb.proc[console_list_current_instance->proc->type].data.ID ) : (( console_list_current_instance->proc->type == 0 ) ? "Main" : "proc" ),id );
                         sprintf( cmd, "PRIVATES %d", id ) ;
                         console_do( cmd );
@@ -2186,7 +2187,7 @@ static int console_keyboard_handler_cb( SDL_keysym k ) {
 
                     if ( k.sym == SDLK_F5 ) {
                         int id = LOCDWORD( mod_debug, console_list_current_instance, PROCESS_ID ) ;
-                        console_printf( "¬04%s (%d) PUBLICS¬07\n\n",
+                        console_printf( "Â¬04%s (%d) PUBLICSÂ¬07\n\n",
                                 ( dcb.data.NSourceFiles && dcb.proc[console_list_current_instance->proc->type].data.ID ) ? getid_name( dcb.proc[console_list_current_instance->proc->type].data.ID ) : (( console_list_current_instance->proc->type == 0 ) ? "Main" : "proc" ),id );
                         sprintf( cmd, "PUBLICS %d", id ) ;
                         console_do( cmd );
@@ -2277,7 +2278,7 @@ static int console_keyboard_handler_cb( SDL_keysym k ) {
                 }
             }
 
-            if ( !( k.mod & KMOD_LALT ) ) console_getkey( k.unicode, k.sym ) ;
+            if ( !( k.mod & KMOD_LALT ) ) console_getkey( ( k.sym >= 32 && k.sym < 127 ) ? k.sym : 0, k.sym ) ;
             return 1;
         }
     }
@@ -2293,7 +2294,6 @@ static void console_draw( void * what, REGION * clip ) {
     if ( break_on_next_proc ) return ;
 
 /*    if ( debug_on_frame ) {
-        SDL_EnableKeyRepeat( 250, 50 );
         debug_on_frame = 0;
         debugger_show_console = 1;
     }
@@ -2373,7 +2373,7 @@ static void console_draw( void * what, REGION * clip ) {
             int off = 0;
 
             do {
-                if ( console[line][pos] == '¬' ) {
+                if ( console[line][pos] == 'Â¬' ) {
                     off += 3;
                     systext_puts( scrbitmap, x, y, console[line] + pos, 3 ) ;
                 }
@@ -2395,7 +2395,7 @@ static void console_draw( void * what, REGION * clip ) {
     if ( debugger_show_console && trace_sentence != -1 ) {
         if ( dcb.data.Version < 0x0710 ) {
             if ( trace_instance && instance_exists( trace_instance ) && dcb.sourcecount[trace_sentence >> 24] ) {
-                console_printf( "¬07[%s(%d):%d]\n¬14%s¬07\n\n",
+                console_printf( "Â¬07[%s(%d):%d]\nÂ¬14%sÂ¬07\n\n",
                         trace_instance->proc->name,
                         LOCDWORD( mod_debug, trace_instance, PROCESS_ID ),
                         trace_sentence & 0xFFFFFF,
@@ -2403,7 +2403,7 @@ static void console_draw( void * what, REGION * clip ) {
             }
         } else {
             if ( trace_instance && instance_exists( trace_instance ) && dcb.sourcecount[trace_sentence >> 20] ) {
-                console_printf( "¬07[%s(%d):%d]\n¬14%s¬07\n\n",
+                console_printf( "Â¬07[%s(%d):%d]\nÂ¬14%sÂ¬07\n\n",
                         trace_instance->proc->name,
                         LOCDWORD( mod_debug, trace_instance, PROCESS_ID ),
                         trace_sentence & 0xFFFFF,

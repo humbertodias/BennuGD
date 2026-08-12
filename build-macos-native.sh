@@ -1,14 +1,18 @@
 #!/bin/sh
-# Native Linux build for modern arches (x86_64, etc.).
+# Native macOS build (arm64 / x86_64).
 # Uses pkg-config for SDL3 / SDL3_mixer / OpenSSL via Autotools.
 #
 # Usage:
-#   ./build-linux-native.sh           # incremental make
-#   ./build-linux-native.sh release   # autoreconf + configure + make + deploy
-#   ./build-linux-native.sh clean     # distclean generated files
+#   ./build-macos-native.sh           # incremental make
+#   ./build-macos-native.sh release   # autoreconf + configure + make + deploy
+#   ./build-macos-native.sh clean     # distclean generated files
 #
 # Optional: source scripts/ci build env first if SDL3 lives in a custom prefix:
-#   source .deps/env.sh && ./build-linux-native.sh release
+#   source .deps/env.sh && ./build-macos-native.sh release
+#
+# Homebrew tip (Apple Silicon):
+#   brew install automake autoconf libtool pkg-config openssl@3 libpng
+#   export PKG_CONFIG_PATH="$(brew --prefix openssl@3)/lib/pkgconfig:$(brew --prefix libpng)/lib/pkgconfig"
 
 set -e
 
@@ -16,15 +20,15 @@ ROOT=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 cd "$ROOT"
 
 case "$(uname -s)" in
-    Linux) ;;
+    Darwin) ;;
     *)
-        echo "build-linux-native.sh is for Linux only; use ./build-macos-native.sh on macOS." >&2
+        echo "build-macos-native.sh is for macOS only; use ./build-linux-native.sh on Linux." >&2
         exit 1
         ;;
 esac
 
-TARGET=$(uname -m)-linux-gnu
-JOBS=$(nproc 2>/dev/null || echo 2)
+TARGET=$(uname -m)-apple-darwin
+JOBS=$(sysctl -n hw.ncpu 2>/dev/null || echo 2)
 MODE=${1:-}
 
 clean_autotools() {
@@ -108,16 +112,30 @@ fi
 
 echo "### Deploying to bin/${TARGET}... ###"
 mkdir -p "bin/${TARGET}"
-cp -f core/bgdi/src/.libs/bgdi "bin/${TARGET}/"
-cp -f core/bgdc/src/bgdc "bin/${TARGET}/"
-cp -f core/bgdrtm/src/.libs/libbgdrtm.so "bin/${TARGET}/"
-find modules -name '*.so' -exec cp -f {} "bin/${TARGET}/" \;
-# bgdc/bgdi load "mod_foo.so"; libtool emits libmod_foo.so
-for f in "bin/${TARGET}"/libmod_*.so; do
+
+if [ -x core/bgdi/src/.libs/bgdi ]; then
+    cp -f core/bgdi/src/.libs/bgdi "bin/${TARGET}/"
+elif [ -x core/bgdi/src/bgdi ]; then
+    cp -f core/bgdi/src/bgdi "bin/${TARGET}/"
+fi
+if [ -x core/bgdc/src/bgdc ]; then
+    cp -f core/bgdc/src/bgdc "bin/${TARGET}/"
+elif [ -x core/bgdc/src/.libs/bgdc ]; then
+    cp -f core/bgdc/src/.libs/bgdc "bin/${TARGET}/"
+fi
+
+cp -f core/bgdrtm/src/.libs/libbgdrtm.dylib "bin/${TARGET}/" 2>/dev/null || \
+    cp -f core/bgdrtm/src/.libs/libbgdrtm.*.dylib "bin/${TARGET}/"
+
+find modules -name '*.dylib' -exec cp -f {} "bin/${TARGET}/" \;
+
+# bgdi loads "mod_foo.dylib"; libtool emits libmod_foo.dylib
+for f in "bin/${TARGET}"/libmod_*.dylib; do
     [ -e "$f" ] || continue
     base=$(basename "$f")
     ln -sfn "$base" "bin/${TARGET}/${base#lib}"
 done
+
 if [ -f tools/moddesc/moddesc ]; then
     cp -f tools/moddesc/moddesc "bin/${TARGET}/"
 elif [ -f tools/moddesc/.libs/moddesc ]; then
@@ -125,11 +143,12 @@ elif [ -f tools/moddesc/.libs/moddesc ]; then
 fi
 
 echo "### Stripping... ###"
-strip "bin/${TARGET}/bgdi" "bin/${TARGET}/bgdc" "bin/${TARGET}/libbgdrtm.so" || true
-[ -f "bin/${TARGET}/moddesc" ] && strip "bin/${TARGET}/moddesc" || true
-find "bin/${TARGET}" -name '*.so' -exec strip {} \; || true
+strip "bin/${TARGET}/bgdi" "bin/${TARGET}/bgdc" 2>/dev/null || true
+strip -x "bin/${TARGET}"/libbgdrtm*.dylib 2>/dev/null || true
+[ -f "bin/${TARGET}/moddesc" ] && strip "bin/${TARGET}/moddesc" 2>/dev/null || true
+find "bin/${TARGET}" -name '*.dylib' -exec strip -x {} \; 2>/dev/null || true
 
 echo "### Done! Binaries in bin/${TARGET} ###"
 echo "Example:"
-echo "  export LD_LIBRARY_PATH=\"$ROOT/bin/${TARGET}:\$LD_LIBRARY_PATH\""
+echo "  export DYLD_LIBRARY_PATH=\"$ROOT/bin/${TARGET}:\$DYLD_LIBRARY_PATH\""
 echo "  $ROOT/bin/${TARGET}/bgdc game.prg && $ROOT/bin/${TARGET}/bgdi game.dcb"
