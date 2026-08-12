@@ -34,7 +34,8 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
+#include "sdl3_compat.h"
 
 #include "bgdcore.h"
 #include "bgdrtm.h"
@@ -419,7 +420,7 @@ static void console_getkey( int key, int sym ) {
         }
     }
 
-    if ( key >= SDLK_SPACE && key <= SDLK_WORLD_95 ) {
+    if ( key >= SDLK_SPACE && key <= 0xFF ) {
         buffer[0] = key ;
         buffer[1] = 0 ;
         strcat( console_input, buffer ) ;
@@ -1579,7 +1580,7 @@ static void console_do( const char * command ) {
     }
 
     if ( strcmp( action, "GO" ) == 0 ) {
-        SDL_EnableKeyRepeat( 0, 0 );
+        /* SDL_EnableKeyRepeat removed in SDL3 */ ;
         debugger_show_console = 0;
         debugger_trace = 0;
         debugger_step = 0;
@@ -1589,7 +1590,7 @@ static void console_do( const char * command ) {
     }
 
     if ( strcmp( action, "NEXTFRAME" ) == 0 ) {
-        SDL_EnableKeyRepeat( 0, 0 );
+        /* SDL_EnableKeyRepeat removed in SDL3 */ ;
         debugger_show_console = 0;
         debugger_trace = 0;
         debugger_step = 0;
@@ -1599,7 +1600,7 @@ static void console_do( const char * command ) {
     }
 
     if ( strcmp( action, "NEXTPROC" ) == 0 ) {
-        SDL_EnableKeyRepeat( 0, 0 );
+        /* SDL_EnableKeyRepeat removed in SDL3 */ ;
         debugger_show_console = 0;
         debugger_trace = 0;
         debugger_step = 0;
@@ -1609,7 +1610,7 @@ static void console_do( const char * command ) {
     }
 
     if ( strcmp( action, "TRACE" ) == 0 ) {
-        SDL_EnableKeyRepeat( 0, 0 );
+        /* SDL_EnableKeyRepeat removed in SDL3 */ ;
         debugger_show_console = 0;
         debugger_trace = 1;
         debugger_step = 0;
@@ -1619,7 +1620,7 @@ static void console_do( const char * command ) {
     }
 
     if ( strcmp( action, "STEP" ) == 0 ) {
-        SDL_EnableKeyRepeat( 0, 0 );
+        /* SDL_EnableKeyRepeat removed in SDL3 */ ;
         debugger_show_console = 0;
         debugger_trace = 0;
         debugger_step = 1;
@@ -2085,7 +2086,7 @@ static void console_do( const char * command ) {
 /* Hotkey for exit (ALT+X)                                                     */
 /* --------------------------------------------------------------------------- */
 
-static int force_exit_cb( SDL_keysym k ) {
+static int force_exit_cb( Bennu_Keysym k ) {
     debugger_show_console = 0;
     exit_value = 0;
     must_exit = 1 ;
@@ -2096,16 +2097,16 @@ static int force_exit_cb( SDL_keysym k ) {
 /* Hotkeys for activate/deactivate console                                     */
 /* --------------------------------------------------------------------------- */
 
-static int console_keyboard_handler_cb( SDL_keysym k ) {
+static int console_keyboard_handler_cb( Bennu_Keysym k ) {
     char cmd[256];
 
     if ( dcb.data.NSourceFiles ) {
         if (( k.mod & KMOD_LALT ) && k.sym == SDLK_c ) {
             if ( !debugger_show_console ) {
-                SDL_EnableKeyRepeat( 250, 50 );
+                /* SDL_EnableKeyRepeat removed in SDL3 */ ;
                 debugger_show_console = 1;
             } else {
-                SDL_EnableKeyRepeat( 0, 0 );
+                /* SDL_EnableKeyRepeat removed in SDL3 */ ;
                 debugger_show_console = 0;
             }
             return 1;
@@ -2277,7 +2278,7 @@ static int console_keyboard_handler_cb( SDL_keysym k ) {
                 }
             }
 
-            if ( !( k.mod & KMOD_LALT ) ) console_getkey( k.unicode, k.sym ) ;
+            if ( !( k.mod & KMOD_LALT ) ) console_getkey( ( k.sym >= 32 && k.sym < 127 ) ? k.sym : 0, k.sym ) ;
             return 1;
         }
     }
@@ -2293,7 +2294,6 @@ static void console_draw( void * what, REGION * clip ) {
     if ( break_on_next_proc ) return ;
 
 /*    if ( debug_on_frame ) {
-        SDL_EnableKeyRepeat( 250, 50 );
         debug_on_frame = 0;
         debugger_show_console = 1;
     }

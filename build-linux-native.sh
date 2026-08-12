@@ -1,11 +1,14 @@
 #!/bin/sh
 # Native Linux build for modern arches (x86_64, etc.).
-# Uses system pkg-config / OpenSSL via the Autotools linux-gnu * path.
+# Uses system pkg-config for SDL3 / SDL3_mixer / OpenSSL via Autotools.
 #
 # Usage:
 #   ./build-linux-native.sh           # incremental make
 #   ./build-linux-native.sh release   # autoreconf + configure + make + deploy
 #   ./build-linux-native.sh clean     # distclean generated files
+#
+# Optional: source scripts/ci build env first if SDL3 lives in a custom prefix:
+#   source .deps/env.sh && ./build-linux-native.sh release
 
 set -e
 

@@ -49,4 +49,19 @@ test -f "$TMP/smoke.dcb"
 "$BIN/bgdi" "$TMP/smoke.dcb" | tee /tmp/bgdi-smoke.txt
 grep -q 'ci-ok' /tmp/bgdi-smoke.txt
 
+# Video path (headless-friendly)
+export SDL_VIDEODRIVER="${SDL_VIDEODRIVER:-dummy}"
+cat > "$TMP/video.prg" <<'EOF'
+import "mod_video"
+import "mod_say"
+Process Main()
+Begin
+    set_mode(320,200,32);
+    say("video-ok");
+End
+EOF
+"$BIN/bgdc" "$TMP/video.prg"
+"$BIN/bgdi" "$TMP/video.dcb" | tee /tmp/bgdi-video.txt
+grep -q 'video-ok' /tmp/bgdi-video.txt
+
 echo "Smoke tests passed."

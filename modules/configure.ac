@@ -31,7 +31,6 @@ case "$target_os" in
 
         COMMON_CFLAGS="$COMMON_CFLAGS $CFLAGS"
         COMMON_LDFLAGS="$COMMON_LDFLAGS $LDFLAGS"
-        SDL_MIXER_DEPS="-lSDL -lvorbis -logg -lmad -lvorbisfile -lvorbisidec"
         LM=-lm
         ;;
 
@@ -51,14 +50,12 @@ case "$target_os" in
             arm)
                 COMMON_CFLAGS="$COMMON_CFLAGS -DUSE_LIBDES $CFLAGS -I`pwd`/../3rdparty/des-4.04b"
                 COMMON_LDFLAGS="$COMMON_LDFLAGS $LDFLAGS -L`pwd`/../3rdparty/des-4.04b -ldes"
-                SDL_MIXER_DEPS="-lSDL -liconv -lvorbis -logg -lmad -lvorbisfile -lvorbisidec"
                 LM=-lm
                 ;;
 
             mipsel)
                 COMMON_CFLAGS="$COMMON_CFLAGS -DUSE_LIBDES $CFLAGS -I`pwd`/../3rdparty/des-4.04b"
                 COMMON_LDFLAGS="$COMMON_LDFLAGS $LDFLAGS -L`pwd`/../3rdparty/des-4.04b -ldes"
-                SDL_MIXER_DEPS="-lSDL -liconv -lvorbis -logg -lmad -lvorbisfile -lvorbisidec"
                 LM=-lm
                 ;;
 
@@ -134,20 +131,19 @@ fi
 
 dnl librerias para todos
 
-dnl Check for SDL library
+dnl Check for SDL3 / SDL3_mixer
 
-PKG_CHECK_MODULES([SDL], [sdl >= 1.2])
+PKG_CHECK_MODULES([SDL], [sdl3])
 PKG_CHECK_MODULES(ZLIB, [ zlib ])
 PKG_CHECK_MODULES([PNG], [libpng >= 1.2])
-PKG_CHECK_MODULES([SDL_mixer], [SDL_mixer])
+PKG_CHECK_MODULES([SDL_mixer], [sdl3-mixer])
+
+dnl SDL2-era symbol aliases + project surface helpers (sdl3_compat.h in libvideo/)
+COMMON_CFLAGS="$COMMON_CFLAGS -DSDL_ENABLE_OLD_NAMES -I`pwd`/libvideo"
 
 if test "$USE_OPENSSL" = "yes"; then
 AC_CHECK_LIB($LIBSSL, DES_ecb_encrypt, [AC_CHECK_HEADER(openssl/des.h,CRYPT_LDFLAGS=-l$LIBSSL,)], [AC_MSG_ERROR($LIBSSL not found!)])
 fi
-
-#AC_CHECK_LIB(z, gzsetparams, [AC_CHECK_HEADER(zlib.h,ZLIBS="-lz",)], [AC_MSG_ERROR(zlib not found!)])
-#AC_CHECK_LIB(png, png_read_info, [AC_CHECK_HEADER(png.h,PNGLIBS="-lpng",)], AC_MSG_ERROR(PNG library not found!), -lz $LM)
-#AC_CHECK_LIB(SDL_mixer, Mix_AllocateChannels, [AC_CHECK_HEADER(SDL_mixer.h,LIBS+="-lSDL_mixer",)], [AC_MSG_ERROR(libSDL_mixer not found!)], $SDL_MIXER_DEPS)
 
 AC_CHECK_LIB(X11, [XQueryTree,XMoveWindow],X11LIBS="-lX11",)
 
