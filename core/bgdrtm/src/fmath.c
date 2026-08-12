@@ -27,6 +27,7 @@
  */
 
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "fmath.h"
 
@@ -50,7 +51,7 @@ static fixed * cos_table = NULL ;
 
 fixed ftofix( float x )
 {
-    return ( long )( x * FIXED_PREC );
+    return ( int32_t )( x * FIXED_PREC );
 }
 
 /* --------------------------------------------------------------------------- */

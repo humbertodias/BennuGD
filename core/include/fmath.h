@@ -30,6 +30,7 @@
 #define _FMATH_H
 
 #include <math.h>
+#include <stdint.h>
 
 #include "bgdcore.h"
 
@@ -46,7 +47,7 @@
 #define SGN(a)  (((a) < 0) ? -1 : !(a) ? 0 : 1)
 #endif
 
-typedef long int fixed ;
+typedef int32_t fixed ;
 
 extern fixed ftofix( float x );
 extern float fixtof( fixed x );

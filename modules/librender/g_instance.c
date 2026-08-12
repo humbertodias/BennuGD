@@ -187,8 +187,9 @@ void draw_instance_at( INSTANCE * i, REGION * region, int x, int y, GRAPH * dest
 /* --------------------------------------------------------------------------- */
 /* Rutinas gráficas de alto nivel */
 
-void draw_instance( INSTANCE * i, REGION * clip )
+void draw_instance( void * what, REGION * clip )
 {
+    INSTANCE * i = ( INSTANCE * ) what ;
     GRAPH * map ;
     int16_t * blend_table = NULL ;
     int flags;
@@ -276,8 +277,9 @@ void draw_instance( INSTANCE * i, REGION * clip )
  *      1 if there is any change, 0 otherwise
  */
 
-int draw_instance_info( INSTANCE * i, REGION * region, int * z, int * drawme )
+int draw_instance_info( void * what, REGION * region, int * z, int * drawme )
 {
+    INSTANCE * i = ( INSTANCE * ) what ;
     GRAPH * graph;
 
     * drawme = 0;
@@ -390,7 +392,7 @@ int draw_instance_info( INSTANCE * i, REGION * region, int * z, int * drawme )
 void __bgdexport( librender, instance_create_hook )( INSTANCE * r )
 {
     /* COORZ is 0 when a new instance is created */
-    LOCDWORD( librender, r, OBJECTID ) = gr_new_object( /* LOCINT32( librender, r, COORDZ ) */ 0, ( OBJ_INFO * ) draw_instance_info, ( OBJ_DRAW * ) draw_instance, ( void * ) r );
+    LOCDWORD( librender, r, OBJECTID ) = gr_new_object( /* LOCINT32( librender, r, COORDZ ) */ 0, draw_instance_info, draw_instance, ( void * ) r );
 }
 
 /*

@@ -2279,7 +2279,7 @@ static int console_keyboard_handler_cb( SDL_keysym k ) {
 
 /* --------------------------------------------------------------------------- */
 
-static void console_draw( INSTANCE * i, REGION * clip ) {
+static void console_draw( void * what, REGION * clip ) {
     int x, y, line, count ;
 
     if ( break_on_next_proc ) return ;
@@ -2428,7 +2428,7 @@ static void console_draw( INSTANCE * i, REGION * clip ) {
 
 /* --------------------------------------------------------------------------- */
 
-static int console_info( INSTANCE * i, REGION * clip, int * z, int * drawme ) {
+static int console_info( void * what, REGION * clip, int * z, int * drawme ) {
 
     * drawme = debugger_show_console || show_expression_count || ( console_y > 0 );
 
@@ -2500,7 +2500,7 @@ void __bgdexport( mod_debug, module_initialize )() {
         hotkey_add( KMOD_LALT, SDLK_x, force_exit_cb );
         hotkey_add( 0,      0, console_keyboard_handler_cb );
 
-        gr_new_object( -2147483647L - 1, ( OBJ_INFO * ) console_info, ( OBJ_DRAW * ) console_draw, ( void * ) 0 );
+        gr_new_object( -2147483647L - 1, console_info, console_draw, ( void * ) 0 );
     }
 }
 
