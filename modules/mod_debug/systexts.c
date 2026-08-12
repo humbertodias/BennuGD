@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2006-2019 SplinterGU (Fenix/Bennugd)
- *  Copyright © 2002-2006 Fenix Team (Fenix)
- *  Copyright © 1999-2002 José Luis Cebrián Pagüe (Fenix)
+ *  Copyright Â© 2006-2019 SplinterGU (Fenix/Bennugd)
+ *  Copyright Â© 2002-2006 Fenix Team (Fenix)
+ *  Copyright Â© 1999-2002 JosÃ© Luis CebriÃ¡n PagÃ¼e (Fenix)
  *
  *  This file is part of Bennu - Game Development
  *
@@ -994,7 +994,7 @@ void systext_puts( GRAPH * map, int x, int y, char * str, int len );
 
 /* --------------------------------------------------------------------------- */
 
-static uint8_t * letters = ( uint8_t * ) " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.:;=%abcdefghijklmnopqrstuvwxyz[](){}-><_,\\/+*!¡?¿\"'\x01\x02\x03ÁÉÍÓÚÑáéíóúñ" ;
+static uint8_t * letters = ( uint8_t * ) " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.:;=%abcdefghijklmnopqrstuvwxyz[](){}-><_,\\/+*!\241?\277\"'\1\2\3\301\311\315\323\332\321\341\351\355\363\372\361" ;
 
 static int fg = 0, bg = 0;
 
@@ -1077,7 +1077,7 @@ void systext_puts( GRAPH * map, int x, int y, char * str, int len )
 {
     while ( *str && len )
     {
-        if ( *str == '¬' )
+        if ( *str == '\254' )
         {
             uint8_t color = 0 ;
             str++ ;
