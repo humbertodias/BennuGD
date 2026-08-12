@@ -116,13 +116,11 @@ jobs:
           fi
 
       - name: Build SDL3 dependencies
-        env:
         run: |
           chmod +x scripts/ci/*.sh build-linux-native.sh build-macos-native.sh build-windows-native.sh
           scripts/ci/build-sdl3-deps.sh
 
       - name: Build
-        env:
         run: |
           # shellcheck disable=SC1091
           source "$DEPS_DIR/env.sh"
