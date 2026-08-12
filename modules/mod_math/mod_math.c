@@ -150,7 +150,7 @@ static int math_isnan( INSTANCE * my, intptr_t * params )
 static int math_finite( INSTANCE * my, intptr_t * params )
 {
     double param = ( double ) *( float * ) &params[0] ;
-    return finite ( param );
+    return isfinite( param );
 }
 
 /* --------------------------------------------------------------------------- */
