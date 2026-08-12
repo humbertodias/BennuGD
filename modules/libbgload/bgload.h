@@ -34,12 +34,12 @@
 typedef struct
 {
     char *file;
-    int *id, ( *fn )();
+    int *id, ( *fn )( const char * );
 } bgdata ;
 
 /* --------------------------------------------------------------------------- */
 
-extern int bgload( int ( *fn )(), int * params );
+extern int bgload( int ( *fn )( const char * ), int * params );
 
 /* --------------------------------------------------------------------------- */
 

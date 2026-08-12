@@ -35,7 +35,7 @@ case "$target_os" in
         ;;
 
     linux-gnu*)
-        COMMON_CFLAGS="-Wall -DTARGET_LINUX"
+        COMMON_CFLAGS="-std=gnu17 -Wall -DTARGET_LINUX -Wno-error=incompatible-pointer-types -Wno-error=int-conversion"
         COMMON_LDFLAGS="$COMMON_LDFLAGS -lc -ldl"
 
         case "$target_cpu" in
@@ -54,6 +54,13 @@ case "$target_os" in
             mipsel)
                 COMMON_CFLAGS="$COMMON_CFLAGS -DUSE_LIBDES $CFLAGS -I`pwd`/../3rdparty/des-4.04b"
                 COMMON_LDFLAGS="$COMMON_LDFLAGS $LDFLAGS -L`pwd`/../3rdparty/des-4.04b -ldes -lz"
+                ;;
+
+            *)
+                # x86_64 and other modern arches: OpenSSL DES (same default as BennuGD64)
+                COMMON_CFLAGS="$COMMON_CFLAGS -DUSE_OPENSSL"
+                LIBSSL="crypto"
+                USE_OPENSSL=yes
                 ;;
 
         esac

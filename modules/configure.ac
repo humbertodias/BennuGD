@@ -36,7 +36,7 @@ case "$target_os" in
         ;;
 
     linux-gnu*)
-        COMMON_CFLAGS="-Wall -DTARGET_LINUX"
+        COMMON_CFLAGS="-std=gnu17 -Wall -DTARGET_LINUX -Wno-error=incompatible-pointer-types -Wno-error=int-conversion"
         COMMON_LDFLAGS="$COMMON_LIBS -lc -ldl"
 
         case "$target_cpu" in
@@ -60,6 +60,13 @@ case "$target_os" in
                 COMMON_LDFLAGS="$COMMON_LDFLAGS $LDFLAGS -L`pwd`/../3rdparty/des-4.04b -ldes"
                 SDL_MIXER_DEPS="-lSDL -liconv -lvorbis -logg -lmad -lvorbisfile -lvorbisidec"
                 LM=-lm
+                ;;
+
+            *)
+                # x86_64 and other modern arches
+                LM=-lm
+                LIBSSL="crypto"
+                USE_OPENSSL=yes
                 ;;
 
         esac
