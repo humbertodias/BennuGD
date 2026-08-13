@@ -32,7 +32,7 @@
 
 #include <time.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 /* NEEDED FOR LOCALE DETECTION */
 #include <windows.h>
 #include <windef.h>
@@ -112,7 +112,7 @@ int main( int argc, char *argv[] )
         }
     }
 
-#ifdef WIN32
+#ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
 #endif
@@ -133,7 +133,7 @@ int main( int argc, char *argv[] )
     /* Default lang to EN */
     strcpy( langinfo, "EN" );
     /* LANG detect */
-#ifdef WIN32
+#ifdef _WIN32
     GetLocaleInfo( LOCALE_USER_DEFAULT, LOCALE_SABBREVCTRYNAME, langinfo, 64 );
     strlwr( langinfo );
 #else
@@ -407,7 +407,7 @@ int main( int argc, char *argv[] )
 
             /* Default compiler imports */
             strcpy( compilerimport, argv[0] );
-#ifdef WIN32
+#ifdef _WIN32
             REMOVE_EXT( compilerimport );
 #endif
             strcat( compilerimport, ".imp" );
@@ -447,7 +447,7 @@ int main( int argc, char *argv[] )
     {
         if ( !file_exists( stubname ) )
         {
-#ifdef WIN32
+#ifdef _WIN32
             char exepath[__MAX_PATH];
 
             GetModuleFileName( NULL, exepath, sizeof( exepath ) );
@@ -467,13 +467,13 @@ int main( int argc, char *argv[] )
 #endif
             if ( !file_exists( stubname ) )
             {
-#ifdef WIN32
+#ifdef _WIN32
                 strcat( stubname, ".exe" );
                 if ( !file_exists( stubname ) )
                 {
 #endif
                     compile_error( "Can't open stub file %s", stubname );
-#ifdef WIN32
+#ifdef _WIN32
                     return -1;
                 }
 #endif
@@ -482,7 +482,7 @@ int main( int argc, char *argv[] )
         }
 
         REMOVE_EXT( dcbname );
-#ifdef WIN32
+#ifdef _WIN32
         strcat( dcbname, ".exe" );
 #endif
         dcb_save( dcbname, dcb_options, stubname );
