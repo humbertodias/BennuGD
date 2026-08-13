@@ -112,6 +112,11 @@ int main( int argc, char *argv[] )
         }
     }
 
+#ifdef WIN32
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+#endif
+
     /* get pathname of executable */
     ptr = strstr( appexefullpath, appexename );
     appexepath = calloc( 1, ptr - appexefullpath + 1 );
